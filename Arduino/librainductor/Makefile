@@ -151,6 +151,7 @@ clean:
 	rm -v $(BUILD_DIR)/crt/*.o
 	rm -v $(BUILD_DIR)/crt/avr/*.o
 	rm -v $(BUILD_DIR)/libsam/*.o
+	rm -v $(BUILD_DIR)/libsam/USB/*.o
 	rm -v $(BUILD_DIR)/uShell/*.o
 	rm -v $(BUILD_DIR)/core.a
 	rm -v $(BUILD_DIR)/librainductor.map
