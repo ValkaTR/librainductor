@@ -1,0 +1,385 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:omron_g2r-1
+LIBS:schrak_-_rt425024
+LIBS:takamisawa_-_na24w-k
+LIBS:te_connectivity
+LIBS:valkatr
+LIBS:arduino_shieldsNCL
+LIBS:libreinductor-cache
+EELAYER 27 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 11 12
+Title ""
+Date "20 nov 2014"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L SW_PUSH SW?
+U 1 1 544E6CED
+P 2900 1900
+F 0 "SW?" H 3050 2010 50  0000 C CNN
+F 1 "SW_PUSH" H 2900 1820 50  0000 C CNN
+F 2 "~" H 2900 1900 60  0000 C CNN
+F 3 "~" H 2900 1900 60  0000 C CNN
+	1    2900 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 544E6CFC
+P 2500 1750
+F 0 "#PWR?" H 2500 1840 20  0001 C CNN
+F 1 "+5V" H 2500 1840 30  0000 C CNN
+F 2 "" H 2500 1750 60  0000 C CNN
+F 3 "" H 2500 1750 60  0000 C CNN
+	1    2500 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L DGND #PWR?
+U 1 1 544E6D0B
+P 3750 2750
+F 0 "#PWR?" H 3750 2750 40  0001 C CNN
+F 1 "DGND" H 3750 2680 40  0000 C CNN
+F 2 "" H 3750 2750 60  0000 C CNN
+F 3 "" H 3750 2750 60  0000 C CNN
+	1    3750 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 544E6D2E
+P 3350 2250
+F 0 "R?" V 3430 2250 40  0000 C CNN
+F 1 "10 kΩ" V 3357 2251 40  0000 C CNN
+F 2 "~" V 3280 2250 30  0000 C CNN
+F 3 "~" H 3350 2250 30  0000 C CNN
+	1    3350 2250
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 0 1 544E6D3D
+P 3750 1900
+F 0 "R?" V 3830 1900 40  0000 C CNN
+F 1 "10 kΩ" V 3757 1901 40  0000 C CNN
+F 2 "~" V 3680 1900 30  0000 C CNN
+F 3 "~" H 3750 1900 30  0000 C CNN
+	0    3750 1900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C?
+U 1 1 544E6D4C
+P 4150 2300
+F 0 "C?" H 4150 2400 40  0000 L CNN
+F 1 "100 nF" H 4156 2215 40  0000 L CNN
+F 2 "~" H 4188 2150 30  0000 C CNN
+F 3 "~" H 4150 2300 60  0000 C CNN
+	1    4150 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 1750 2500 1900
+Wire Wire Line
+	2500 1900 2600 1900
+Wire Wire Line
+	3200 1900 3500 1900
+Wire Wire Line
+	3350 2000 3350 1900
+Connection ~ 3350 1900
+Wire Wire Line
+	3350 2500 3350 2600
+Wire Wire Line
+	3350 2600 4150 2600
+Wire Wire Line
+	4150 2600 4150 2500
+Wire Wire Line
+	4150 2100 4150 1900
+Wire Wire Line
+	4000 1900 4600 1900
+Wire Wire Line
+	3750 2600 3750 2750
+Connection ~ 3750 2600
+Text HLabel 4600 1900 2    60   Output ~ 0
+START
+Connection ~ 4150 1900
+$Comp
+L SW_PUSH SW?
+U 1 1 544E81FF
+P 2900 3700
+F 0 "SW?" H 3050 3810 50  0000 C CNN
+F 1 "SW_PUSH" H 2900 3620 50  0000 C CNN
+F 2 "~" H 2900 3700 60  0000 C CNN
+F 3 "~" H 2900 3700 60  0000 C CNN
+	1    2900 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 544E8205
+P 2500 3550
+F 0 "#PWR?" H 2500 3640 20  0001 C CNN
+F 1 "+5V" H 2500 3640 30  0000 C CNN
+F 2 "" H 2500 3550 60  0000 C CNN
+F 3 "" H 2500 3550 60  0000 C CNN
+	1    2500 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L DGND #PWR?
+U 1 1 544E820B
+P 3750 4550
+F 0 "#PWR?" H 3750 4550 40  0001 C CNN
+F 1 "DGND" H 3750 4480 40  0000 C CNN
+F 2 "" H 3750 4550 60  0000 C CNN
+F 3 "" H 3750 4550 60  0000 C CNN
+	1    3750 4550
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 544E8211
+P 3350 4050
+F 0 "R?" V 3430 4050 40  0000 C CNN
+F 1 "10 kΩ" V 3357 4051 40  0000 C CNN
+F 2 "~" V 3280 4050 30  0000 C CNN
+F 3 "~" H 3350 4050 30  0000 C CNN
+	1    3350 4050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 544E8217
+P 3750 3700
+F 0 "R?" V 3830 3700 40  0000 C CNN
+F 1 "10 kΩ" V 3757 3701 40  0000 C CNN
+F 2 "~" V 3680 3700 30  0000 C CNN
+F 3 "~" H 3750 3700 30  0000 C CNN
+	1    3750 3700
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C?
+U 1 1 544E821D
+P 4150 4100
+F 0 "C?" H 4150 4200 40  0000 L CNN
+F 1 "100 nF" H 4156 4015 40  0000 L CNN
+F 2 "~" H 4188 3950 30  0000 C CNN
+F 3 "~" H 4150 4100 60  0000 C CNN
+	1    4150 4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 3550 2500 3700
+Wire Wire Line
+	2500 3700 2600 3700
+Wire Wire Line
+	3200 3700 3500 3700
+Wire Wire Line
+	3350 3800 3350 3700
+Connection ~ 3350 3700
+Wire Wire Line
+	3350 4300 3350 4400
+Wire Wire Line
+	3350 4400 4150 4400
+Wire Wire Line
+	4150 4400 4150 4300
+Wire Wire Line
+	4150 3900 4150 3700
+Wire Wire Line
+	4000 3700 4600 3700
+Wire Wire Line
+	3750 4400 3750 4550
+Connection ~ 3750 4400
+Text HLabel 4600 3700 2    60   Output ~ 0
+STOP
+Connection ~ 4150 3700
+$Comp
+L +5V #PWR?
+U 1 1 544E8238
+P 6050 1450
+F 0 "#PWR?" H 6050 1540 20  0001 C CNN
+F 1 "+5V" H 6050 1540 30  0000 C CNN
+F 2 "" H 6050 1450 60  0000 C CNN
+F 3 "" H 6050 1450 60  0000 C CNN
+	1    6050 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L DGND #PWR?
+U 1 1 544E823E
+P 6600 2750
+F 0 "#PWR?" H 6600 2750 40  0001 C CNN
+F 1 "DGND" H 6600 2680 40  0000 C CNN
+F 2 "" H 6600 2750 60  0000 C CNN
+F 3 "" H 6600 2750 60  0000 C CNN
+	1    6600 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 544E824A
+P 6600 1900
+F 0 "R?" V 6680 1900 40  0000 C CNN
+F 1 "10 kΩ" V 6607 1901 40  0000 C CNN
+F 2 "~" V 6530 1900 30  0000 C CNN
+F 3 "~" H 6600 1900 30  0000 C CNN
+	1    6600 1900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C?
+U 1 1 544E8250
+P 7000 2300
+F 0 "C?" H 7000 2400 40  0000 L CNN
+F 1 "100 nF" H 7006 2215 40  0000 L CNN
+F 2 "~" H 7038 2150 30  0000 C CNN
+F 3 "~" H 7000 2300 60  0000 C CNN
+	1    7000 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7000 2100 7000 1900
+Wire Wire Line
+	6850 1900 7450 1900
+Text HLabel 7450 1900 2    60   Output ~ 0
+POT1
+Connection ~ 7000 1900
+$Comp
+L POT RV?
+U 1 1 544E8266
+P 6050 1900
+F 0 "RV?" H 6050 1800 50  0000 C CNN
+F 1 "10 kΩ" H 6050 1900 50  0000 C CNN
+F 2 "~" H 6050 1900 60  0000 C CNN
+F 3 "~" H 6050 1900 60  0000 C CNN
+	1    6050 1900
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6200 1900 6350 1900
+Wire Wire Line
+	6050 2150 6050 2600
+Wire Wire Line
+	6050 2600 7000 2600
+Wire Wire Line
+	7000 2600 7000 2500
+Wire Wire Line
+	6600 2750 6600 2600
+Connection ~ 6600 2600
+Wire Wire Line
+	6050 1450 6050 1650
+$Comp
+L +5V #PWR?
+U 1 1 544E831E
+P 6000 3250
+F 0 "#PWR?" H 6000 3340 20  0001 C CNN
+F 1 "+5V" H 6000 3340 30  0000 C CNN
+F 2 "" H 6000 3250 60  0000 C CNN
+F 3 "" H 6000 3250 60  0000 C CNN
+	1    6000 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L DGND #PWR?
+U 1 1 544E8324
+P 6550 4550
+F 0 "#PWR?" H 6550 4550 40  0001 C CNN
+F 1 "DGND" H 6550 4480 40  0000 C CNN
+F 2 "" H 6550 4550 60  0000 C CNN
+F 3 "" H 6550 4550 60  0000 C CNN
+	1    6550 4550
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 544E832A
+P 6550 3700
+F 0 "R?" V 6630 3700 40  0000 C CNN
+F 1 "10 kΩ" V 6557 3701 40  0000 C CNN
+F 2 "~" V 6480 3700 30  0000 C CNN
+F 3 "~" H 6550 3700 30  0000 C CNN
+	1    6550 3700
+	0    -1   -1   0   
+$EndComp
+$Comp
+L C C?
+U 1 1 544E8330
+P 6950 4100
+F 0 "C?" H 6950 4200 40  0000 L CNN
+F 1 "100 nF" H 6956 4015 40  0000 L CNN
+F 2 "~" H 6988 3950 30  0000 C CNN
+F 3 "~" H 6950 4100 60  0000 C CNN
+	1    6950 4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6950 3900 6950 3700
+Wire Wire Line
+	6800 3700 7400 3700
+Text HLabel 7400 3700 2    60   Output ~ 0
+POT2
+Connection ~ 6950 3700
+$Comp
+L POT RV?
+U 1 1 544E833A
+P 6000 3700
+F 0 "RV?" H 6000 3600 50  0000 C CNN
+F 1 "10 kΩ" H 6000 3700 50  0000 C CNN
+F 2 "~" H 6000 3700 60  0000 C CNN
+F 3 "~" H 6000 3700 60  0000 C CNN
+	1    6000 3700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6150 3700 6300 3700
+Wire Wire Line
+	6000 3950 6000 4400
+Wire Wire Line
+	6000 4400 6950 4400
+Wire Wire Line
+	6950 4400 6950 4300
+Wire Wire Line
+	6550 4550 6550 4400
+Connection ~ 6550 4400
+Wire Wire Line
+	6000 3250 6000 3450
+$EndSCHEMATC

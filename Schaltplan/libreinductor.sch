@@ -1,0 +1,454 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:omron_g2r-1
+LIBS:schrak_-_rt425024
+LIBS:takamisawa_-_na24w-k
+LIBS:te_connectivity
+LIBS:valkatr
+LIBS:arduino_shieldsNCL
+LIBS:libreinductor-cache
+EELAYER 27 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 12
+Title ""
+Date "20 nov 2014"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L TRANSFO T?
+U 1 1 5449B911
+P 4600 2250
+F 0 "T?" H 4600 2500 70  0000 C CNN
+F 1 "TRANSFO" H 4600 1950 70  0000 C CNN
+F 2 "~" H 4600 2250 60  0000 C CNN
+F 3 "~" H 4600 2250 60  0000 C CNN
+	1    4600 2250
+	1    0    0    -1  
+$EndComp
+$Comp
+L SPST SW?
+U 1 1 5449CC0F
+P 3500 2050
+F 0 "SW?" H 3500 2150 70  0000 C CNN
+F 1 "SPST" H 3500 1950 70  0000 C CNN
+F 2 "~" H 3500 2050 60  0000 C CNN
+F 3 "~" H 3500 2050 60  0000 C CNN
+	1    3500 2050
+	1    0    0    -1  
+$EndComp
+$Comp
+L GNDPWR #PWR?
+U 1 1 544C15B6
+P 9100 2750
+F 0 "#PWR?" H 9100 2800 40  0001 C CNN
+F 1 "GNDPWR" H 9100 2670 40  0000 C CNN
+F 2 "" H 9100 2750 60  0000 C CNN
+F 3 "" H 9100 2750 60  0000 C CNN
+	1    9100 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L INDUCTOR L?
+U 1 1 544DAC06
+P 9850 4000
+F 0 "L?" V 9800 4000 40  0000 C CNN
+F 1 "INDUCTOR" V 9950 4000 40  0000 C CNN
+F 2 "~" H 9850 4000 60  0000 C CNN
+F 3 "~" H 9850 4000 60  0000 C CNN
+	1    9850 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 544DAC15
+P 9550 4000
+F 0 "C?" H 9550 4100 40  0000 L CNN
+F 1 "C" H 9556 3915 40  0000 L CNN
+F 2 "~" H 9588 3850 30  0000 C CNN
+F 3 "~" H 9550 4000 60  0000 C CNN
+	1    9550 4000
+	1    0    0    -1  
+$EndComp
+$Sheet
+S 4300 3350 1000 1300
+U 544E981B
+F0 "System Control" 50
+F1 "system_control.sch" 50
+F2 "GATE_1L" O R 5300 4350 60 
+F3 "GATE_1H" O R 5300 4250 60 
+F4 "GATE_2L" O R 5300 4550 60 
+F5 "GATE_2H" O R 5300 4450 60 
+F6 "START" I L 4300 3450 60 
+F7 "STOP" I L 4300 3550 60 
+F8 "AD0" I L 4300 3850 60 
+F9 "AD1" I L 4300 3950 60 
+F10 "AD2" I L 4300 4050 60 
+F11 "AD3" I L 4300 4150 60 
+F12 "AD4" I L 4300 4250 60 
+F13 "AD5" I L 4300 4350 60 
+$EndSheet
+$Sheet
+S 5500 1750 1100 800 
+U 544EBC06
+F0 "Noncontrolled Rectifier" 50
+F1 "noncontrolled_rectifier.sch" 50
+F2 "IN2" I L 5500 1850 60 
+F3 "IN1" I L 5500 2450 60 
+F4 "OUT2" O R 6600 1850 60 
+F5 "OUT1" O R 6600 2450 60 
+$EndSheet
+$Sheet
+S 7500 1750 1100 800 
+U 544F05A2
+F0 "Voltage Fed qZSI with Continous Input Current" 50
+F1 "qzsi_filter.sch" 50
+F2 "IN2" I L 7500 1850 60 
+F3 "IN1" I L 7500 2450 60 
+F4 "OUT2" O R 8600 1850 60 
+F5 "OUT1" O R 8600 2450 60 
+$EndSheet
+$Sheet
+S 7500 3350 1100 1300
+U 544FB8C5
+F0 "Inverter Bridge" 50
+F1 "inverter_bridge.sch" 50
+F2 "OUT2" O R 8600 3450 60 
+F3 "OUT1" O R 8600 4550 60 
+F4 "DC+" I L 7500 3450 60 
+F5 "DC-" I L 7500 3650 60 
+F6 "GATE_1H" I L 7500 4250 60 
+F7 "GATE_1L" I L 7500 4350 60 
+F8 "GATE_2H" I L 7500 4450 60 
+F9 "GATE_2L" I L 7500 4550 60 
+$EndSheet
+Text Label 9100 1850 0    60   ~ 0
+DC_BUS
+$Comp
+L GNDPWR #PWR?
+U 1 1 5450A51E
+P 6400 3850
+F 0 "#PWR?" H 6400 3900 40  0001 C CNN
+F 1 "GNDPWR" H 6400 3770 40  0000 C CNN
+F 2 "" H 6400 3850 60  0000 C CNN
+F 3 "" H 6400 3850 60  0000 C CNN
+	1    6400 3850
+	1    0    0    -1  
+$EndComp
+Text Label 7300 3450 2    60   ~ 0
+DC_BUS
+$Comp
+L CONN_3 K?
+U 1 1 5450F21D
+P 1400 1950
+F 0 "K?" V 1350 1950 50  0000 C CNN
+F 1 "CONN_3" V 1450 1950 40  0000 C CNN
+F 2 "" H 1400 1950 60  0000 C CNN
+F 3 "" H 1400 1950 60  0000 C CNN
+	1    1400 1950
+	-1   0    0    1   
+$EndComp
+Text Label 1900 1850 0    60   ~ 0
+L1
+Text Label 1900 1950 0    60   ~ 0
+PE
+Text Label 1900 2050 0    60   ~ 0
+N
+Text Label 2900 2050 0    60   ~ 0
+L1
+Text Label 2900 2450 0    60   ~ 0
+N
+$Sheet
+S 2300 5750 1000 900 
+U 54516CF5
+F0 "Power Supply" 50
+F1 "power_supply.sch" 50
+F2 "L1" I L 2300 5850 60 
+F3 "N" I L 2300 6050 60 
+F4 "GND" O R 3300 6450 60 
+F5 "+7..12 V" O R 3300 5850 60 
+F6 "+5 V" O R 3300 6050 60 
+$EndSheet
+Text Label 2000 5850 0    60   ~ 0
+L1
+Text Label 2000 6050 0    60   ~ 0
+N
+$Comp
+L +5V #PWR?
+U 1 1 544DBC0A
+P 3500 5650
+F 0 "#PWR?" H 3500 5740 20  0001 C CNN
+F 1 "+5V" H 3500 5740 30  0000 C CNN
+F 2 "" H 3500 5650 60  0000 C CNN
+F 3 "" H 3500 5650 60  0000 C CNN
+	1    3500 5650
+	1    0    0    -1  
+$EndComp
+$Comp
+L DGND #PWR?
+U 1 1 544DBD5E
+P 3500 6700
+F 0 "#PWR?" H 3500 6700 40  0001 C CNN
+F 1 "DGND" H 3500 6630 40  0000 C CNN
+F 2 "" H 3500 6700 60  0000 C CNN
+F 3 "" H 3500 6700 60  0000 C CNN
+	1    3500 6700
+	1    0    0    -1  
+$EndComp
+$Sheet
+S 2300 3350 1100 1300
+U 544E3FC7
+F0 "Human Machine Interface" 50
+F1 "hmi.sch" 50
+F2 "START" O R 3400 3450 60 
+F3 "STOP" O R 3400 3550 60 
+F4 "POT1" O R 3400 3850 60 
+F5 "POT2" O R 3400 3950 60 
+$EndSheet
+$Sheet
+S 7500 4950 1500 1100
+U 54508367
+F0 "Feedback Isolator" 50
+F1 "feedback.sch" 50
+F2 "VOLTAGE1+" I R 9000 5750 60 
+F3 "VOLTAGE1-" I R 9000 5850 60 
+F4 "VOLTAGE2+" I R 9000 5450 60 
+F5 "VOLTAGE2-" I R 9000 5550 60 
+F6 "CURRENT1+" I R 9000 5150 60 
+F7 "CURRENT1-" I R 9000 5250 60 
+F8 "VOLTAGE1_OUT" O L 7500 5150 60 
+F9 "VOLTAGE2_OUT" O L 7500 5450 60 
+F10 "CURRENT1_OUT" O L 7500 5750 60 
+$EndSheet
+$Comp
+L GNDPWR #PWR?
+U 1 1 54509BCA
+P 9200 6050
+F 0 "#PWR?" H 9200 6100 40  0001 C CNN
+F 1 "GNDPWR" H 9200 5970 40  0000 C CNN
+F 2 "" H 9200 6050 60  0000 C CNN
+F 3 "" H 9200 6050 60  0000 C CNN
+	1    9200 6050
+	-1   0    0    -1  
+$EndComp
+Text Label 9200 5750 0    60   ~ 0
+DC_BUS
+Text Label 9700 3450 2    60   ~ 0
+Y
+Text Label 9700 4550 2    60   ~ 0
+X
+Text Label 9200 5450 0    60   ~ 0
+Y
+Text Label 9200 5550 0    60   ~ 0
+X
+$Comp
+L R R?
+U 1 1 54513E72
+P 7050 3650
+F 0 "R?" V 7130 3650 40  0000 C CNN
+F 1 "60mV/10A" V 7057 3651 40  0000 C CNN
+F 2 "~" V 6980 3650 30  0000 C CNN
+F 3 "~" H 7050 3650 30  0000 C CNN
+	1    7050 3650
+	0    -1   -1   0   
+$EndComp
+Text Label 6750 3750 3    60   ~ 0
+DC_BUS_SENSE-
+Text Label 7350 3750 3    60   ~ 0
+DC_BUS_SENSE+
+Wire Wire Line
+	4000 2050 4200 2050
+Wire Wire Line
+	2900 2050 3000 2050
+Wire Wire Line
+	9550 3800 9550 3650
+Wire Wire Line
+	9550 3650 9700 3650
+Wire Wire Line
+	9700 3650 9850 3650
+Wire Wire Line
+	9850 3650 9850 3700
+Wire Wire Line
+	9550 4200 9550 4350
+Wire Wire Line
+	9550 4350 9700 4350
+Wire Wire Line
+	9700 4350 9850 4350
+Wire Wire Line
+	9850 4350 9850 4300
+Wire Wire Line
+	9700 4550 9700 4350
+Connection ~ 9700 4350
+Wire Wire Line
+	9700 3450 9700 3650
+Connection ~ 9700 3650
+Wire Wire Line
+	5000 2450 5500 2450
+Wire Wire Line
+	5000 2050 5200 2050
+Wire Wire Line
+	5200 2050 5200 1850
+Wire Wire Line
+	5200 1850 5500 1850
+Wire Wire Line
+	6600 1850 7500 1850
+Wire Wire Line
+	6600 2450 7500 2450
+Wire Wire Line
+	8600 2450 9100 2450
+Wire Wire Line
+	9100 2450 9100 2750
+Wire Wire Line
+	8600 1850 9100 1850
+Wire Wire Line
+	8600 3450 9700 3450
+Wire Wire Line
+	8600 4550 9700 4550
+Wire Wire Line
+	6400 3850 6400 3650
+Wire Wire Line
+	6400 3650 6750 3650
+Wire Wire Line
+	6750 3650 6800 3650
+Wire Wire Line
+	7300 3450 7500 3450
+Wire Wire Line
+	1750 1850 1900 1850
+Wire Wire Line
+	1750 1950 1900 1950
+Wire Wire Line
+	1750 2050 1900 2050
+Wire Wire Line
+	4200 2450 2900 2450
+Wire Wire Line
+	2000 5850 2300 5850
+Wire Wire Line
+	2000 6050 2300 6050
+Wire Wire Line
+	3300 6050 3500 6050
+Wire Wire Line
+	3500 6050 3500 5650
+Wire Wire Line
+	3300 6450 3500 6450
+Wire Wire Line
+	3500 6450 3500 6700
+Wire Wire Line
+	5300 4250 7500 4250
+Wire Wire Line
+	5300 4350 7500 4350
+Wire Wire Line
+	5300 4450 7500 4450
+Wire Wire Line
+	5300 4550 7500 4550
+Wire Wire Line
+	3400 3850 4300 3850
+Wire Wire Line
+	3400 3950 4300 3950
+Wire Wire Line
+	3400 3450 4300 3450
+Wire Wire Line
+	3400 3550 4300 3550
+Wire Wire Line
+	9200 6050 9200 5850
+Wire Wire Line
+	9200 5850 9000 5850
+Wire Wire Line
+	9200 5750 9000 5750
+Wire Wire Line
+	7300 3650 7350 3650
+Wire Wire Line
+	7350 3650 7500 3650
+Wire Wire Line
+	6750 3750 6750 3650
+Connection ~ 6750 3650
+Wire Wire Line
+	7350 3750 7350 3650
+Connection ~ 7350 3650
+Text Label 9200 5250 0    60   ~ 0
+DC_BUS_SENSE-
+Text Label 9200 5150 0    60   ~ 0
+DC_BUS_SENSE+
+Wire Wire Line
+	9200 5150 9000 5150
+Wire Wire Line
+	9200 5250 9000 5250
+Wire Wire Line
+	9200 5450 9000 5450
+Wire Wire Line
+	9200 5550 9000 5550
+Wire Wire Line
+	7500 5750 3900 5750
+Wire Wire Line
+	3900 5750 3900 4050
+Wire Wire Line
+	3900 4050 4300 4050
+Wire Wire Line
+	7500 5450 4000 5450
+Wire Wire Line
+	4000 5450 4000 4150
+Wire Wire Line
+	4000 4150 4300 4150
+Wire Wire Line
+	7500 5150 4100 5150
+Wire Wire Line
+	4100 5150 4100 4250
+Wire Wire Line
+	4100 4250 4300 4250
+Wire Notes Line
+	10400 6400 10400 1100
+Wire Notes Line
+	10400 1100 2600 1100
+Wire Notes Line
+	2600 1100 2600 3000
+Wire Notes Line
+	1000 3000 5800 3000
+Wire Notes Line
+	5800 3000 5800 7000
+Wire Notes Line
+	5800 6400 10400 6400
+Wire Notes Line
+	5800 7000 1000 7000
+Wire Notes Line
+	1000 7000 1000 3000
+Text Notes 2700 1300 0    60   ~ 0
+Power Section
+Text Notes 1100 3200 0    60   ~ 0
+Control Section
+Text Notes 1200 1600 0    60   ~ 0
+Mains Socket
+$EndSCHEMATC
