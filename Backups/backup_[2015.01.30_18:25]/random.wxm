@@ -1,0 +1,72 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 13.04.2 ] */
+
+/* [wxMaxima: input   start ] */
+load("interpol")$
+load("draw")$
+load("distrib")$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+linearinterpol([[x1,y1],[x2,y2]]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(x-x2) * (y2-y1)/(x2-x1) + y2, x1,
+ x1 = 0, y1 = h,
+ x2 = a/2, y2 = 0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+assume( s > 0 );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+m: 0;
+s: 0.1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+cdf_normal(x, m, s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+wxplot2d( cdf_normal(x, m, s), [x, -2, 2], [y, -1, 3] );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+steps: 1000$
+A: make_array(flonum, steps)$
+B: make_array(flonum, steps)$
+for i: 1 thru steps - 1 do
+(
+    A[i]: i - cdf_normal(i, m, s),
+    B[i]: cdf_normal(random(0.5) - 0.75, m, s)
+)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+scene1: gr2d(
+    dimensions = [1280, 720],
+    grid = true,
+    user_preamble = "set key top",
+    font = "CMU Serif",
+    nticks = 60,
+    xtics = auto,
+
+    key = "LPF",
+    color = black,
+    point_type    = plus,
+    point_size    = 1,
+    points_joined = false,
+    points(A,B)
+)$
+draw(scene1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+draw(terminal = wxt, scene1);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

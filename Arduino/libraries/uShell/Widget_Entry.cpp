@@ -122,7 +122,7 @@ int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command
 		}
 	}
 	
-	return widget_def_proc( window, command, uParam, vParam );
+	return window_def_proc( window, command, uParam, vParam );
 }
 
 // #############################################################################

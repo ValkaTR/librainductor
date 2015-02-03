@@ -97,17 +97,29 @@ struct CONSOLE_CLASS *console_init( int _w, int _h )
 	if( console->buffer2 == NULL ) Serial.println( "assert failed: console->buffer2 == NULL" );
 	
 	// Background
+	// TODO: Make beautiful gradient background
+	//float m = 0, s1 = 0.5, s2 = 1;
 	for( int j = 0; j < console->h; j++ )
 	{
 		for( int i = 0; i < console->w; i++ )
 		{
-			switch( background_xpm[j + 5][i] )
-			{
-				case '@': console->buffer_current[i + j * console->w].ch = 0xFA /* · */; break;
-				case '+': console->buffer_current[i + j * console->w].ch = 0xB0 /* ░ */; break;
-				case '.': console->buffer_current[i + j * console->w].ch = 0xB1 /* ▒ */; break;
-				case ' ': console->buffer_current[i + j * console->w].ch = 0xB2 /* ▓ */; break;
-			}
+			float rnd1 = random( -100, 100 ) / 100.0;
+			
+			float r_x = 2.0 * (float) i / (float) console->w - 1;
+			float r_y = 2.0 * (float) j / (float) console->h - 1;
+			float cdf = cdf_normal( r_y, 0, 0.2 );
+			float pdf = exp( - 10.0 * pow( rnd1, 2 ) );
+			float val = pdf * cdf;
+
+			if( val <= -0.5 )
+				console->buffer_current[i + j * console->w].ch = 0x20; /*   */
+			else if( val >= -0.5 && val < 0.0 )
+				console->buffer_current[i + j * console->w].ch = 0xB0; /* ░ */
+			else if( val >= 0.0 && val < 0.5 )
+				console->buffer_current[i + j * console->w].ch = 0xB1; /* ▒ */
+			else if( val >= 0.5 )
+				console->buffer_current[i + j * console->w].ch = 0xB2; /* ▓ */
+
 			console->buffer_current[i + j * console->w].fg_color = VT100_COLOR_WHITE;
 			console->buffer_current[i + j * console->w].bg_color = VT100_COLOR_BLUE;
 		}
@@ -220,7 +232,7 @@ void console_swap_buffers( struct CONSOLE_CLASS *console )
 	g_string_free( output, true );
 	g_string_free( coordinate, true );
 	g_string_free( style, true );
-
+	
 	// Swap buffers
 	size_t buffer_size = sizeof(struct CONSOLE_BUFFER_CELL) * console->w * console->h;
 	if( console->buffer_current == console->buffer1 )

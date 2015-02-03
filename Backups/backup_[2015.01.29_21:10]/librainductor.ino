@@ -27,29 +27,24 @@
 
 #include "uShell.h"
 
+#include "Prompt.h"
 #include "Window.h"
-#include "Window_Prompt.h"
-#include "Window_GPIO.h"
 
 #include "garray.h"
 
-void cmd_func_help( struct WINDOW_CLASS *win, GSList *token_list );
-void cmd_func_test( struct WINDOW_CLASS *win, GSList *token_list );
-void cmd_func_led( struct WINDOW_CLASS *win, GSList *token_list );
+void cmd_func_help( char *txt );
+void cmd_func_test( char *txt );
 
-struct PROMPT_COMMAND command_list[] =
+struct PROMPT_COMMAND cmd_list[] =
 {
 	{ "help", cmd_func_help },
 	{ "test", cmd_func_test },
-	{ "led", cmd_func_led },
 	{ NULL, NULL }
 };
 
 struct USHELL_CLASS *ushell;
-struct WINDOW_CLASS *prompt;
-struct WINDOW_CLASS *gpio;
 
-int ledPin = 13;      // select the pin for the LED
+struct WINDOW_CLASS *prompt;
 
 // ############################################################################
 
@@ -62,67 +57,28 @@ void setup( )
 	// initialize serial:
 	Serial.begin( 115200 );
 
-	//
-	// uShell
-	//
-
 	ushell = ushell_init( printEvent, NULL );
-
-	//
-	// GPIO window
-	//
-	
-	struct WINDOW_ATTRIBUTES gpio_attributes =
-	{
-		.fg_color = VT100_COLOR_DEFAULT,
-		.bg_color = VT100_COLOR_DEFAULT,
-		.border_style = WINDOW_BORDER_SINGLE
-	};
-	
-	struct WINDOW_RECT gpio_rect =
-	{
-		.x = 0, .y = 0,
-		.w = 80, .h = 12
-	};
-	
-	struct GPIO_CLASS *gpio_class = (struct GPIO_CLASS *) malloc( sizeof(struct GPIO_CLASS) );
-	memset( gpio_class, 0, sizeof(struct GPIO_CLASS) );
-
-	gpio = window_create(
-		ushell,
-		NULL,
-		"GPIO",
-		&gpio_attributes,
-		&gpio_rect,
-		gpio_def_wnd_proc,
-		gpio_class
-	);
-
-	//
-	// Prompt window
-	//
 	
 	struct WINDOW_ATTRIBUTES prompt_attributes =
 	{
-		.fg_color = VT100_COLOR_DEFAULT,
-		.bg_color = VT100_COLOR_DEFAULT,
-		.border_style = WINDOW_BORDER_DOUBLE
+		.fg_color = 7,
+		.bg_color = 0,
+		.border_style = WINDOW_BORDER_SINGLE
 	};
 	
 	struct WINDOW_RECT prompt_rect =
 	{
-		.x = 0, .y = 12,
-		.w = 80, .h = 12
+		.x = 2, .y = 12,
+		.w = 77, .h = 10
 	};
 	
 	struct PROMPT_CLASS *prompt_class = (struct PROMPT_CLASS *) malloc( sizeof(struct PROMPT_CLASS) );
 	memset( prompt_class, 0, sizeof(struct PROMPT_CLASS) );
-	prompt_class->command_list = command_list;
+	prompt_class->cmd_list = cmd_list;
 	prompt_class->prompt = "librainductor> ";
 
-	prompt = window_create(
+	prompt = window_create( 
 		ushell,
-		NULL,
 		"Prompt",
 		&prompt_attributes,
 		&prompt_rect,
@@ -130,10 +86,18 @@ void setup( )
 		prompt_class
 	);
 	
-	//
+	// initialize digital pin 13 as an output.
+	pinMode(13, OUTPUT);
 	
-	// declare the ledPin as an OUTPUT:
-	pinMode( ledPin, OUTPUT );
+	digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+	delay(250);              // wait for a second
+	digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+	delay(250);   
+
+	//Serial.println(prompt->input_line->str);
+	//digitalWrite(13, HIGH);delay(250);digitalWrite(13, LOW);delay(250);		
+
+	//Serial.print("love is the solution for everything?\r\n\r\n");
 }
 
 // ############################################################################
@@ -151,7 +115,7 @@ void loop( )
 		console_swap_buffers( ushell->console );
 		g_string_free( str_tmp, true );
 	}*/
-
+	
 	ushell_proccess_loop( ushell );
 }
 
@@ -187,7 +151,7 @@ void printEvent( char *str, void *user_def )
 // ############################################################################
 // ############################################################################
 
-void cmd_func_help( struct WINDOW_CLASS *win, GSList *token_list )
+void cmd_func_help( char *txt )
 {
 	prompt_print( prompt, "Available commands:" );
 	prompt_print( prompt, " " );
@@ -195,29 +159,9 @@ void cmd_func_help( struct WINDOW_CLASS *win, GSList *token_list )
 	prompt_print( prompt, " " );
 }
 
-void cmd_func_test( struct WINDOW_CLASS *win, GSList *token_list )
+void cmd_func_test( char *txt )
 {
 	prompt_print( prompt, "Hello! Love is the solution for everything <3" );
-}
-
-void cmd_func_led( struct WINDOW_CLASS *win, GSList *token_list )
-{
-	GSList *token = token_list->next;
-	if( token == NULL )
-	{
-led_usage:
-		prompt_print( prompt, "Change the state of on-board LED" );
-		prompt_print( prompt, "Usage: led [on/off]" );
-		return;
-	}
-	
-	char *parameter = token->data;
-	if( strcmp( parameter, "on" ) == 0 )
-		digitalWrite( ledPin, HIGH );
-	else if( strcmp( parameter, "off" ) == 0 )
-		digitalWrite( ledPin, LOW );
-	else
-		goto led_usage;
 }
 
 // ############################################################################

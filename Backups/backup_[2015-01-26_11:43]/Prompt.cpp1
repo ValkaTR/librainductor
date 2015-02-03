@@ -1,0 +1,287 @@
+	GString *str = g_string_sized_new( 32 );
+	char *text = "command parameter1 \"parameter2 test test\" parameter3";
+    GSList *list = tokenize_command_line(win, text);
+    GSList *token = list; int i = 0;
+    while( token != NULL )
+    {
+        //g_string_append_printf(str, "[%i] %s\r\n", i, (gchar *) token->data );
+
+		char num[10];
+		itoa( i, num, 10 );        
+        g_string_append( str, "[" );
+        g_string_append( str, num );
+        g_string_append( str, "] " );
+        g_string_append( str, (char *) token->data );
+        prompt_print( win, str->str );
+        g_string_truncate( str, 0 );
+
+        token = token->next;
+        i += 1;
+    }
+    g_string_free( str, true );
+    return;
+
+// #############################################################################
+//
+//
+//
+// #############################################################################
+// includes of system headers
+//
+
+#include <Arduino.h>
+
+// #############################################################################
+// includes of local headers
+//
+
+#include "Prompt.h"
+
+// #############################################################################
+// global variables
+//
+
+// #############################################################################
+// functions
+
+struct USHELL *prompt_callback( struct USHELL_WINDOW *window, int command, int uParam, int vParam )
+{
+	switch( command )
+	{
+		case WM_CREATE:
+		{
+			cmd_list( cmd_list ),
+			prompt( prompt ),
+			
+			cmd_esc_buf( "" ),
+			cmd_buffer( "" ),         // a string to hold incoming data
+			cmd_temp( "" ),           // temp buffer
+			cmd_string( "" ),         // a string to proccess cmds
+			cmd_number( "" ),         // a string to control numbers
+			
+			cmd_pos( 0 ),
+			
+			cmd_complete( false ),   // whether the string is complete
+			
+			cmd_esc_pos( 0 ),
+			cmd_escape( false ),
+
+			// reserve 200 bytes for the inputString:
+			cmd_esc_buf.reserve(200);
+			cmd_string.reserve(200);
+			cmd_buffer.reserve(200);
+			cmd_temp.reserve(200);
+			cmd_number.reserve(10);
+
+
+	cmd_control_character( XTERM_CC_NONE ),
+	mods( { false } ),
+			break;
+		}
+		
+		case WM_KEY_EVENT:
+		{
+			
+			break;
+		}
+	}
+}
+
+// ############################################################################
+
+void Console::prompt_reset( )
+{
+	cmd_string = "";
+	cmd_complete = false;
+	Serial.print( prompt );
+}
+
+// #############################################################################
+
+
+void Console::escape_end( )
+{
+	cmd_number = "";
+	cmd_esc_buf = "";
+	cmd_escape = false;
+	cmd_esc_pos = 0;
+}
+
+void Console::proccess_event( char ch )
+{
+
+}
+
+void ushell_proccess_char( struct USHELL char ch )
+{
+	switch( ch )
+	{
+		case 0x01B:		// Escape
+		{
+			ushell->cmd_escape = true;
+			cmd_esc_pos = cmd_buffer.length( );
+
+			break;
+		}
+
+		case '\r':	// Carriage return
+		{
+			// Copy buffer to string for proccessing
+			cmd_string = cmd_buffer;
+			cmd_buffer = "";
+			cmd_pos = 0;
+
+			// Line feed
+			Serial.print( "\r\n" );
+
+			// if the incoming character is a newline, set a flag
+			// so the main loop can do something about it:
+			cmd_complete = true;
+
+			break;
+		}
+
+		case 0x07F: // Backspace
+		{
+			if( cmd_pos > 0 )
+			{
+				// Move cursor to the right and erase last character
+				int diff = cmd_buffer.length( ) - cmd_pos - 1;
+				for( int i = 0; i < diff; i++ )
+					Serial.print( "\x1B\x5B\x43" ); // Right
+				Serial.print( " " );
+				
+				// Remove character at cursor position
+				cmd_temp = cmd_buffer.substring( 0, cmd_pos - 1 );
+				cmd_temp += cmd_buffer.substring( cmd_pos );
+				cmd_buffer = cmd_temp;
+			
+				// Test
+				//for( int i = 0; i < cmd_buffer.length( ); i++ )
+				//	cmd_buffer[i] ^= 1;
+			
+				//Serial.print( ch );
+				reprint_line( );
+				
+				// Move cursor back to original position
+				for( int i = 0; i != diff + 1; i++ )
+					Serial.print( "\x1B\x5B\x44" ); // Left
+				
+				cmd_pos -= 1;
+			}
+		}
+
+		default:
+		{
+			Serial.print( ch );
+			
+			// Add it to the cmd_string:
+			if( cmd_buffer.length( ) == cmd_pos )
+			{
+				cmd_buffer += ch;
+			}
+			else
+			{
+				// Add character in the middle of the string
+				cmd_temp = cmd_buffer.substring( 0, cmd_pos );
+				cmd_temp += ch;
+				cmd_temp += cmd_buffer.substring( cmd_pos );
+				cmd_buffer = cmd_temp;
+				
+				reprint_line( );
+				
+				// Move cursor back to original position
+				int diff = cmd_buffer.length( ) - cmd_pos + 1;
+				for( int i = 0; i != diff; i++ )
+					Serial.print( "\x1B\x5B\x44" ); // Left
+			}
+
+			cmd_pos += 1;
+
+			break;
+		}
+	}
+}
+
+/**
+ *
+ * name: proccess_key
+ * @param ch character associated with the key
+ * @param mod modifier key(s), such as "Shift", or "Ctrl+Shift"
+ * @param code value indicating a physical key, such as "HOME", "F1" or "A"
+ * @return
+ *
+ */
+void Console::proccess_key( char ch, struct KEY_EVENT_MODIFIERS mod, int code )
+{
+	switch( code )
+	{
+		case VK_UP: { p( "Up" ); break; }
+		case VK_DOWN: { p( "Down" ); break; }
+		//case VK_LEFT: { p( "Left" ); break; }
+		//case VK_RIGHT: { p( "Right" ); break; }
+		case VK_HOME: { p( "Home" ); break; }
+		case VK_END: { p( "End" ); break; }
+		case VK_INSERT: { p( "Insert" ); break; }
+		case VK_DELETE: { p( "Delete" ); break; }
+		case VK_F1: { p( "F1" ); break; }
+		case VK_F2: { p( "F2" ); break; }
+		case VK_F3: { p( "F3" ); break; }
+		case VK_F4: { p( "F4" ); break; }
+		case VK_F5: { p( "F5" ); break; }
+		case VK_F6: { p( "F6" ); break; }
+		case VK_F7: { p( "F7" ); break; }
+		case VK_F8: { p( "F8" ); break; }
+		case VK_F9: { p( "F9" ); break; }
+		case VK_F10: { p( "F10" ); break; }
+		case VK_F11: { p( "F11" ); break; }
+		case VK_F12: { p( "F12" ); break; }
+	}
+
+	switch( code )
+	{
+		case VK_LEFT:
+		{
+			 if( cmd_pos > 0 )
+			 {
+				 cmd_pos -= 1;
+				 Serial.print( "\x1B[D" );
+			 }
+
+			 break;
+		}
+
+		case VK_RIGHT:
+		{
+			 if( cmd_buffer.length( ) > cmd_pos )
+			 {
+				 cmd_pos += 1;
+				 Serial.print( "\x1B[C" );
+			 }
+
+			 break;
+		}
+	}
+}
+
+// #############################################################################
+
+void Console::reprint_line( )
+{
+	// Move cursor to the left
+	Serial.print( '\r' );
+	
+	// Move up if neccessary
+	int line_len = strlen( prompt ) + cmd_buffer.length( );
+	for( int i = 0; i != line_len % w; i++ )
+	{
+		// Up
+		Serial.print( "\x1B\x5B\x41" );
+	}
+	
+	// Reprint
+	Serial.print( prompt );
+	Serial.print( cmd_buffer );
+}
+
+// #############################################################################

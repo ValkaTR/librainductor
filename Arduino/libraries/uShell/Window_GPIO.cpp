@@ -96,7 +96,7 @@ int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command,
 			{
 				.fg_color = VT100_COLOR_DEFAULT,
 				.bg_color = VT100_COLOR_RED,
-				.border_style = WINDOW_BORDER_SINGLE
+				.border_style = WINDOW_BORDER_NONE
 			};
 			
 			struct WINDOW_RECT entry_rect =
@@ -111,7 +111,8 @@ int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command,
 			entry_class->label_align = ENTRY_LABEL_LEFT;
 
 			struct WINDOW_CLASS *entry;
-			entry = window_create( 
+			/*entry = window_create(
+				window->ushell,
 				window,
 				"label:",
 				&entry_attributes,
@@ -120,7 +121,7 @@ int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command,
 				entry_class
 			);
 			
-			entry_set_text( entry, "test" );
+			entry_set_text( entry, "test" );*/
 
 			break;
 		}

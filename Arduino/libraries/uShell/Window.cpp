@@ -22,11 +22,12 @@
 // functions
 
 struct WINDOW_CLASS *window_create(
+	struct USHELL_CLASS *ushell,
 	struct WINDOW_CLASS *parent,
 	const char *title,
 	struct WINDOW_ATTRIBUTES *attributes,
 	struct WINDOW_RECT *rect,
-	int (*wnd_proc) ( struct WINDOW_CLASS *windowdow, enum WINDOW_MESSAGE command, int uParam, int vParam ),
+	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam ),
 	void *user_def
 )
 {
@@ -50,25 +51,27 @@ struct WINDOW_CLASS *window_create(
 
 	window->wnd_proc = wnd_proc;	
 	window->user_def = user_def;
-	
-	//
-	// Make windowdow appear on the console
-	//
 
-	if( parent == NULL )
+	window->ushell = ushell;
+	window->console = ushell->console;
+
+	window->widgets = g_ptr_array_new( );
+	if( parent != NULL )
 	{
-		// Window doesn't have parent
+		window->parent = parent;
+		g_ptr_array_add( parent->widgets, window );
 	}
 	else
 	{
-		window->parent = parent;
-		window->ushell = parent->ushell;
-		window->console = parent->ushell->console;
-		
-		window->widgets = g_ptr_array_new( );
-		g_ptr_array_add( parent->widgets, window );
+		// If there's no parent window, then attach this
+		// to the root
+		g_ptr_array_add( ushell->window_list, window );
 	}
 	
+	//
+	// Make window appear on the console
+	//
+
 	window_send_message( window, WM_CREATE, 0, 0 );
 	window_send_message( window, WM_PAINT, 0, 0 );
 	
@@ -140,41 +143,61 @@ int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, i
 {
 	switch( command )
 	{
-
 		case WM_PAINT:
 		{
-			// Vertical and Horizontal
-			for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, 0, 0xCD /* ═ */ );
-			for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, window->rect.h - 1, 0xCD /* ═ */ );
-			for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, 0, j, 0xBA /* ║ */ );
-			for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, window->rect.w - 1, j, 0xBA /* ║ */ );
-			
-			// Corners
-			window_write_cell( window, 0, 0, 0xC9 /* ╔ */ );
-			window_write_cell( window, 0, window->rect.h - 1, 0xC8 /* ╚ */ );
-			window_write_cell( window, window->rect.w - 1, 0, 0xBB /* ╗ */ );
-			window_write_cell( window, window->rect.w - 1, window->rect.h - 1, 0xBC /* ╝ */ );
+			if( window->attributes.border_style == WINDOW_BORDER_DOUBLE )
+			{
+				// Vertical and Horizontal
+				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, 0, 0xCD /* ═ */ );
+				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, window->rect.h - 1, 0xCD /* ═ */ );
+				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, 0, j, 0xBA /* ║ */ );
+				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, window->rect.w - 1, j, 0xBA /* ║ */ );
+				
+				// Corners
+				window_write_cell( window, 0, 0, 0xC9 /* ╔ */ );
+				window_write_cell( window, 0, window->rect.h - 1, 0xC8 /* ╚ */ );
+				window_write_cell( window, window->rect.w - 1, 0, 0xBB /* ╗ */ );
+				window_write_cell( window, window->rect.w - 1, window->rect.h - 1, 0xBC /* ╝ */ );
+			}
+			else if( window->attributes.border_style == WINDOW_BORDER_SINGLE )
+			{
+				// Vertical and Horizontal
+				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, 0, 0xC4 /* ─ */ );
+				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, window->rect.h - 1, 0xC4 /* ─ */ );
+				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, 0, j, 0xB3 /* │ */ );
+				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, window->rect.w - 1, j, 0xB3 /* │ */ );
+				
+				// Corners
+				window_write_cell( window, 0, 0, 0xDA /* ┌ */ );
+				window_write_cell( window, 0, window->rect.h - 1, 0xC0 /* └ */ );
+				window_write_cell( window, window->rect.w - 1, 0, 0xBF /* ┐ */ );
+				window_write_cell( window, window->rect.w - 1, window->rect.h - 1, 0xD9 /* ┘ */ );
+			}
 
 			// Shadow
 			//for( int i = 1; i < window->rect.w + 1; i++ ) window_write_cell( window, i, window->rect.h, 0xB0 /* ░ */ );
 			//for( int j = 1; j < window->rect.h + 1; j++ ) window_write_cell( window, window->rect.w, j, 0xB0 /* ░ */ );
-			
 			// Title
-			int title_len = strlen( window->title );
-			char title_offset = 4;
-			for( int i = 0; i < title_len; i++ ) window_write_cell( window, i + title_offset, 0, window->title[i] );
-			window_write_cell( window, title_offset - 2, 0, '[' );
-			window_write_cell( window, title_offset - 1, 0, ' ' );
-			window_write_cell( window, title_offset + title_len, 0, ' ' );
-			window_write_cell( window, title_offset + title_len + 1, 0, ']' );
-			
-			// Draw all widgets
-			for( int i = 0; window->widgets->pdata[i]; i++ )
+			if( window->attributes.border_style != WINDOW_BORDER_NONE )
 			{
-				struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) window->widgets->pdata[i];
-				window_send_message( widget, WM_PAINT, 0, 0 );
+				int title_len = strlen( window->title );
+				char title_offset = 4;
+				for( int i = 0; i < title_len; i++ ) window_write_cell( window, i + title_offset, 0, window->title[i] );
+				window_write_cell( window, title_offset - 2, 0, '[' );
+				window_write_cell( window, title_offset - 1, 0, ' ' );
+				window_write_cell( window, title_offset + title_len, 0, ' ' );
+				window_write_cell( window, title_offset + title_len + 1, 0, ']' );
 			}
 			
+			// Draw all widgets
+			if( window->widgets != NULL && window->widgets->len > 0 )
+			{
+				for( int i = 0; window->widgets->pdata[i]; i++ )
+				{
+					struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) window->widgets->pdata[i];
+					window_send_message( widget, WM_PAINT, 0, 0 );
+				}
+			}
 			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
 			console_swap_buffers( window->console );
 			

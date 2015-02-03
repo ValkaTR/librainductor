@@ -20,9 +20,6 @@
 #include "uShell.h"
 #include "Window.h"
 #include "Console.h"
-#include "garray.h"
-
-G_BEGIN_DECLS
 
 // #############################################################################
 // type and constant definitions
@@ -35,10 +32,8 @@ G_BEGIN_DECLS
 enum WINDOW_MESSAGE
 {
 	WM_CREATE = 1,
-	WM_DESTROY,
 	WM_PAINT,
-	WM_KEY_EVENT,
-	WM_CHARACTER
+	WM_KEY_EVENT
 };
 
 struct WINDOW_RECT
@@ -70,19 +65,13 @@ struct WINDOW_CLASS
 	struct WINDOW_RECT rect;
 	
 	struct CONSOLE_BUFFER_CELL *paint_buffer;
-
-	GPtrArray *widgets;
 	
 	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
-
-	int cursor_x;
-	int cursor_y;
 
 	// User defined variable to distinguish different windows in a single wnd_proc
 	void *user_def;
 
 	// Feedback
-	struct WINDOW_CLASS *parent;
 	struct USHELL_CLASS *ushell;
 	struct CONSOLE_CLASS *console;
 };
@@ -93,7 +82,6 @@ struct WINDOW_CLASS
 
 struct WINDOW_CLASS *window_create(
 	struct USHELL_CLASS *ushell,
-	struct WINDOW_CLASS *parent,
 	const char *title,
 	struct WINDOW_ATTRIBUTES *attributes,
 	struct WINDOW_RECT *rect,
@@ -102,17 +90,11 @@ struct WINDOW_CLASS *window_create(
 );
 	
 int window_send_message( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
-struct WINDOW_CLASS *window_get_active( struct USHELL_CLASS *ushell );
-void window_write_text_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *str );
-void window_write_text( struct WINDOW_CLASS *window, int x, int y, char *str );
-void window_write_cell_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char ch );
-void window_write_cell( struct WINDOW_CLASS *window, int x, int y, char ch );
+
 
 int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
 
 // #############################################################################
-
-G_END_DECLS
 
 #endif // __window_h__
 
