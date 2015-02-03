@@ -27,8 +27,9 @@
 
 #include "uShell.h"
 
-#include "Prompt.h"
 #include "Window.h"
+#include "Window_Prompt.h"
+#include "Window_GPIO.h"
 
 #include "garray.h"
 
@@ -46,6 +47,7 @@ struct PROMPT_COMMAND command_list[] =
 
 struct USHELL_CLASS *ushell;
 struct WINDOW_CLASS *prompt;
+struct WINDOW_CLASS *gpio;
 
 int ledPin = 13;      // select the pin for the LED
 
@@ -60,19 +62,56 @@ void setup( )
 	// initialize serial:
 	Serial.begin( 115200 );
 
+	//
+	// uShell
+	//
+
 	ushell = ushell_init( printEvent, NULL );
+
+	//
+	// GPIO window
+	//
+	
+	struct WINDOW_ATTRIBUTES gpio_attributes =
+	{
+		.fg_color = VT100_COLOR_DEFAULT,
+		.bg_color = VT100_COLOR_DEFAULT,
+		.border_style = WINDOW_BORDER_SINGLE
+	};
+	
+	struct WINDOW_RECT gpio_rect =
+	{
+		.x = 0, .y = 0,
+		.w = 80, .h = 12
+	};
+	
+	struct GPIO_CLASS *gpio_class = (struct GPIO_CLASS *) malloc( sizeof(struct GPIO_CLASS) );
+	memset( gpio_class, 0, sizeof(struct GPIO_CLASS) );
+
+	gpio = window_create( 
+		NULL,
+		"GPIO",
+		&gpio_attributes,
+		&gpio_rect,
+		gpio_def_wnd_proc,
+		gpio_class
+	);
+
+	//
+	// Prompt window
+	//
 	
 	struct WINDOW_ATTRIBUTES prompt_attributes =
 	{
-		.fg_color = 7,
-		.bg_color = 0,
+		.fg_color = VT100_COLOR_DEFAULT,
+		.bg_color = VT100_COLOR_DEFAULT,
 		.border_style = WINDOW_BORDER_SINGLE
 	};
 	
 	struct WINDOW_RECT prompt_rect =
 	{
-		.x = 1, .y = 13,
-		.w = 78, .h = 10
+		.x = 0, .y = 12,
+		.w = 80, .h = 12
 	};
 	
 	struct PROMPT_CLASS *prompt_class = (struct PROMPT_CLASS *) malloc( sizeof(struct PROMPT_CLASS) );
@@ -81,13 +120,15 @@ void setup( )
 	prompt_class->prompt = "librainductor> ";
 
 	prompt = window_create( 
-		ushell,
+		NULL,
 		"Prompt",
 		&prompt_attributes,
 		&prompt_rect,
 		prompt_def_wnd_proc,
 		prompt_class
 	);
+	
+	//
 	
 	// declare the ledPin as an OUTPUT:
 	pinMode( ledPin, OUTPUT );

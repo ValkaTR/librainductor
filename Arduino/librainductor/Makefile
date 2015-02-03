@@ -25,7 +25,7 @@ CXX_FLAGS = \
 # uShell library
 
 USHELL_PATH = /home/valka/Документы/Arduino/libraries/uShell
-USHELL_SOURCES = uShell.cpp Console.cpp Window.cpp Prompt.cpp gslice.cpp gstring.cpp gslist.cpp garray.cpp gbytes.cpp gcommon.cpp
+USHELL_SOURCES = uShell.cpp Console.cpp Widget_Entry.cpp Window.cpp Window_ADC.cpp Window_GPIO.cpp Window_Prompt.cpp gslice.cpp gstring.cpp gslist.cpp garray.cpp gbytes.cpp gcommon.cpp
 USHELL_OBJ = ${patsubst %.cpp, $(BUILD_DIR)/uShell/%.o, ${USHELL_SOURCES}}
 
 build/uShell/%.o: $(USHELL_PATH)/%.cpp
@@ -125,8 +125,11 @@ $(BUILD_DIR)/librainductor.elf: librainductor_x variant $(BUILD_DIR)/core.a
 		$(BUILD_DIR)/uShell/gcommon.o \
 		$(BUILD_DIR)/uShell/uShell.o \
 		$(BUILD_DIR)/uShell/Console.o \
-		$(BUILD_DIR)/uShell/Prompt.o \
+		$(BUILD_DIR)/uShell/Widget_Entry.o \
 		$(BUILD_DIR)/uShell/Window.o \
+		$(BUILD_DIR)/uShell/Window_ADC.o \
+		$(BUILD_DIR)/uShell/Window_GPIO.o \
+		$(BUILD_DIR)/uShell/Window_Prompt.o \
 		$(BUILD_DIR)/librainductor.o \
 		$(BUILD_DIR)/variant.o \
 		$(ARDUINO_PATH)/hardware/arduino/sam/variants/arduino_due_x/libsam_sam3x8e_gcc_rel.a \
