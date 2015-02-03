@@ -27,15 +27,15 @@ G_BEGIN_DECLS
 
 /* slices - fast allocation/release of small memory blocks
  */
-gpointer g_slice_alloc          	(gsize	       block_size);
-gpointer g_slice_alloc0         	(gsize         block_size);
-gpointer g_slice_copy                   (gsize         block_size,
-                                         gconstpointer mem_block);
-void     g_slice_free1          	(gsize         block_size,
-					 gpointer      mem_block);
-void     g_slice_free_chain_with_offset (gsize         block_size,
-					 gpointer      mem_chain,
-					 gsize         next_offset);
+gpointer g_slice_alloc( gsize	       block_size );
+gpointer g_slice_alloc0( gsize         block_size );
+gpointer g_slice_copy( gsize         block_size,
+                       gconstpointer mem_block );
+void     g_slice_free1( gsize         block_size,
+                        gpointer      mem_block );
+void     g_slice_free_chain_with_offset( gsize         block_size,
+        gpointer      mem_chain,
+        gsize         next_offset );
 #define  g_slice_new(type)      ((type*) g_slice_alloc (sizeof (type)))
 #define  g_slice_new0(type)     ((type*) g_slice_alloc0 (sizeof (type)))
 /* MemoryBlockType *
@@ -51,19 +51,22 @@ void     g_slice_free_chain_with_offset (gsize         block_size,
  */
 
 /* we go through extra hoops to ensure type safety */
-#define g_slice_dup(type, mem)                                  \
-  (1 ? (type*) g_slice_copy (sizeof (type), (mem))              \
-     : ((void) ((type*) 0 == (mem)), (type*) 0))
-#define g_slice_free(type, mem)				do {	\
-  if (1) g_slice_free1 (sizeof (type), (mem));			\
-  else   (void) ((type*) 0 == (mem)); 				\
-} while (0)
-#define g_slice_free_chain(type, mem_chain, next)	do {	\
-  if (1) g_slice_free_chain_with_offset (sizeof (type),		\
-                 (mem_chain), G_STRUCT_OFFSET (type, next)); 	\
-  else   (void) ((type*) 0 == (mem_chain));			\
-} while (0)
+#define g_slice_dup(type, mem) \
+	(1 ? (type*) g_slice_copy (sizeof (type), (mem)) \
+		: ((void) ((type*) 0 == (mem)), (type*) 0))
 
+#define g_slice_free(type, mem) \
+	do { \
+		if (1) g_slice_free1 (sizeof (type), (mem)); \
+		else (void) ((type*) 0 == (mem)); \
+	} while (0)
+
+#define g_slice_free_chain(type, mem_chain, next) \
+	do { \
+		if (1) g_slice_free_chain_with_offset (sizeof (type), \
+			(mem_chain), G_STRUCT_OFFSET (type, next)); \
+		else   (void) ((type*) 0 == (mem_chain)); \
+	} while (0)
 
 G_END_DECLS
 

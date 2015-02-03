@@ -21,10 +21,10 @@
  * Modified by the GLib Team and others 1997-2000.  See the AUTHORS
  * file for a list of people on the GLib Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
- * GLib at ftp://ftp.gtk.org/pub/gtk/. 
+ * GLib at ftp://ftp.gtk.org/pub/gtk/.
  */
 
-/* 
+/*
  * MT safe
  */
 
@@ -33,19 +33,19 @@
 #include "garray.h"
 #include "gbytes.h"
 
-	// GArray Test
-	/*GArray *garray = g_array_new( false, false, sizeof (gint));
-	for (int i = 0; i < 20; i++)
-	{
-		g_array_append_val (garray, i);
-	}
+// GArray Test
+/*GArray *garray = g_array_new( false, false, sizeof (gint));
+for (int i = 0; i < 20; i++)
+{
+	g_array_append_val (garray, i);
+}
 
-	for (int i = 0; i < 20; i++)
-	{
-		Serial.print( String("garray[") + i + "] = " + g_array_index (garray, int, i) + "\r\n" );
-	}
+for (int i = 0; i < 20; i++)
+{
+	Serial.print( String("garray[") + i + "] = " + g_array_index (garray, int, i) + "\r\n" );
+}
 
-	g_array_free (garray, true);*/
+g_array_free (garray, true);*/
 
 /**
  * SECTION:arrays
@@ -106,14 +106,14 @@ typedef struct _GRealArray  GRealArray;
  **/
 struct _GRealArray
 {
-  unsigned char *data;
-  unsigned int   len;
-  unsigned int   alloc;
-  unsigned int   elt_size;
-  unsigned int   zero_terminated : 1;
-  unsigned int   clear : 1;
-  int    ref_count;
-  GDestroyNotify clear_func;
+	guchar *data;
+	guint len;
+	guint alloc;
+	guint elt_size;
+	guint zero_terminated : 1;
+	guint clear : 1;
+	int ref_count;
+	GDestroyNotify clear_func;
 };
 
 /**
@@ -139,16 +139,14 @@ struct _GRealArray
 
 #define g_array_elt_len(array,i) ((array)->elt_size * (i))
 #define g_array_elt_pos(array,i) ((array)->data + g_array_elt_len((array),(i)))
-#define g_array_elt_zero(array, pos, len) 				\
-  (memset (g_array_elt_pos ((array), pos), 0,  g_array_elt_len ((array), len)))
-#define g_array_zero_terminate(array) /*G_STMT_START*/{			\
-  if ((array)->zero_terminated)						\
-    g_array_elt_zero ((array), (array)->len, 1);			\
+#define g_array_elt_zero(array, pos, len) (memset (g_array_elt_pos ((array), pos), 0,  g_array_elt_len ((array), len)))
+#define g_array_zero_terminate(array) /*G_STMT_START*/{ \
+	if ((array)->zero_terminated) \
+		g_array_elt_zero ((array), (array)->len, 1); \
 }/*G_STMT_END*/
 
-static unsigned int g_nearest_pow        (int        num); //G_GNUC_CONST;
-static void  g_array_maybe_expand (GRealArray *array,
-				   int        len);
+static guint g_nearest_pow( int num );       //G_GNUC_CONST;
+static void  g_array_maybe_expand( GRealArray *array, int len );
 
 /**
  * g_array_new:
@@ -161,14 +159,11 @@ static void  g_array_maybe_expand (GRealArray *array,
  *
  * Creates a new #GArray with a reference count of 1.
  **/
-GArray*
-g_array_new (gboolean zero_terminated,
-	     gboolean clear,
-	     unsigned int    elt_size)
+GArray *g_array_new( gboolean zero_terminated, gboolean clear, guint elt_size )
 {
-  g_return_val_if_fail (elt_size > 0, NULL);
+	g_return_val_if_fail( elt_size > 0, NULL );
 
-  return g_array_sized_new (zero_terminated, clear, elt_size, 0);
+	return g_array_sized_new( zero_terminated, clear, elt_size, 0 );
 }
 
 /**
@@ -186,34 +181,31 @@ g_array_new (gboolean zero_terminated,
  * are going to add many elements to the array. Note however that the
  * size of the array is still 0.
  **/
-GArray* g_array_sized_new (gboolean zero_terminated,
-			   gboolean clear,
-			   unsigned int    elt_size,
-			   unsigned int    reserved_size)
+GArray *g_array_sized_new( gboolean zero_terminated, gboolean clear, guint elt_size, guint reserved_size )
 {
-  GRealArray *array;
-  
-  g_return_val_if_fail (elt_size > 0, NULL);
+	GRealArray *array;
 
-  //array = g_slice_new (GRealArray);
-  array = (GRealArray *) malloc (sizeof(struct _GRealArray));
+	g_return_val_if_fail( elt_size > 0, NULL );
 
-  array->data            = NULL;
-  array->len             = 0;
-  array->alloc           = 0;
-  array->zero_terminated = (zero_terminated ? 1 : 0);
-  array->clear           = (clear ? 1 : 0);
-  array->elt_size        = elt_size;
-  array->ref_count       = 1;
-  array->clear_func      = NULL;
+	//array = g_slice_new (GRealArray);
+	array = ( GRealArray * ) malloc( sizeof( struct _GRealArray ) );
 
-  if (array->zero_terminated || reserved_size != 0)
-    {
-      g_array_maybe_expand (array, reserved_size);
-      g_array_zero_terminate(array);
-    }
+	array->data            = NULL;
+	array->len             = 0;
+	array->alloc           = 0;
+	array->zero_terminated = ( zero_terminated ? 1 : 0 );
+	array->clear           = ( clear ? 1 : 0 );
+	array->elt_size        = elt_size;
+	array->ref_count       = 1;
+	array->clear_func      = NULL;
 
-  return (GArray*) array;
+	if( array->zero_terminated || reserved_size != 0 )
+	{
+		g_array_maybe_expand( array, reserved_size );
+		g_array_zero_terminate( array );
+	}
+
+	return ( GArray * ) array;
 }
 
 /**
@@ -233,15 +225,13 @@ GArray* g_array_sized_new (gboolean zero_terminated,
  *
  * Since: 2.32
  */
-void
-g_array_set_clear_func (GArray         *array,
-                        GDestroyNotify  clear_func)
+void g_array_set_clear_func( GArray *array, GDestroyNotify clear_func )
 {
-  GRealArray *rarray = (GRealArray *) array;
+	GRealArray *rarray = ( GRealArray * ) array;
 
-  g_return_if_fail (array != NULL);
+	g_return_if_fail( array != NULL );
 
-  rarray->clear_func = clear_func;
+	rarray->clear_func = clear_func;
 }
 
 /**
@@ -255,25 +245,24 @@ g_array_set_clear_func (GArray         *array,
  *
  * Since: 2.22
  **/
-GArray *
-g_array_ref (GArray *array)
+GArray *g_array_ref( GArray *array )
 {
-  GRealArray *rarray = (GRealArray*) array;
-  g_return_val_if_fail (array, NULL);
+	GRealArray *rarray = ( GRealArray * ) array;
+	g_return_val_if_fail( array, NULL );
 
-  g_atomic_int_inc (&rarray->ref_count);
+	g_atomic_int_inc( &rarray->ref_count );
 
-  return array;
+	return array;
 }
 
 //typedef enum
 enum ArrayFreeFlags
 {
-  FREE_SEGMENT = 1 << 0,
-  PRESERVE_WRAPPER = 1 << 1
+	FREE_SEGMENT = 1 << 0,
+	PRESERVE_WRAPPER = 1 << 1
 };
 
-static gchar *array_free (GRealArray *,enum ArrayFreeFlags);
+static gchar *array_free( GRealArray *, enum ArrayFreeFlags );
 
 /**
  * g_array_unref:
@@ -286,14 +275,13 @@ static gchar *array_free (GRealArray *,enum ArrayFreeFlags);
  *
  * Since: 2.22
  **/
-void
-g_array_unref (GArray *array)
+void g_array_unref( GArray *array )
 {
-  GRealArray *rarray = (GRealArray*) array;
-  g_return_if_fail (array);
+	GRealArray *rarray = ( GRealArray * ) array;
+	g_return_if_fail( array );
 
-  if (g_atomic_int_dec_and_test (&rarray->ref_count))
-    array_free (rarray, FREE_SEGMENT);
+	if( g_atomic_int_dec_and_test( &rarray->ref_count ) )
+		array_free( rarray, FREE_SEGMENT );
 }
 
 /**
@@ -306,14 +294,13 @@ g_array_unref (GArray *array)
  *
  * Since: 2.22
  **/
-unsigned int
-g_array_get_element_size (GArray *array)
+guint g_array_get_element_size( GArray *array )
 {
-  GRealArray *rarray = (GRealArray*) array;
+	GRealArray *rarray = ( GRealArray * ) array;
 
-  g_return_val_if_fail (array, 0);
+	g_return_val_if_fail( array, 0 );
 
-  return rarray->elt_size;
+	return rarray->elt_size;
 }
 
 /**
@@ -334,61 +321,57 @@ g_array_get_element_size (GArray *array)
  * <note><para>If array elements contain dynamically-allocated memory,
  * they should be freed separately.</para></note>
  **/
-gchar*
-g_array_free (GArray   *farray,
-	      gboolean  free_segment)
+gchar *g_array_free( GArray *farray, gboolean  free_segment )
 {
-  GRealArray *array = (GRealArray*) farray;
-  enum ArrayFreeFlags flags;
+	GRealArray *array = ( GRealArray * ) farray;
+	enum ArrayFreeFlags flags;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  flags = (ArrayFreeFlags) (free_segment ? FREE_SEGMENT : 0);
+	flags = ( ArrayFreeFlags )( free_segment ? FREE_SEGMENT : 0 );
 
-  /* if others are holding a reference, preserve the wrapper but do free/return the data */
-  if (!g_atomic_int_dec_and_test (&array->ref_count))
-  {
-	  flags |= PRESERVE_WRAPPER;
-  }
+	/* if others are holding a reference, preserve the wrapper but do free/return the data */
+	if( !g_atomic_int_dec_and_test( &array->ref_count ) )
+	{
+		flags |= PRESERVE_WRAPPER;
+	}
 
-  return array_free (array, flags);
+	return array_free( array, flags );
 }
 
-static gchar *
-array_free (GRealArray     *array,
-           enum ArrayFreeFlags  flags)
+static gchar *array_free( GRealArray *array, enum ArrayFreeFlags  flags )
 {
-  gchar *segment;
+	gchar *segment;
 
-  if (flags & FREE_SEGMENT)
-    {
-      if (array->clear_func != NULL)
-        {
-          unsigned int i;
+	if( flags & FREE_SEGMENT )
+	{
+		if( array->clear_func != NULL )
+		{
+			guint i;
 
-          for (i = 0; i < array->len; i++)
-            array->clear_func (g_array_elt_pos (array, i));
-        }
+			for( i = 0; i < array->len; i++ )
+				array->clear_func( g_array_elt_pos( array, i ) );
+		}
 
-      g_free (array->data);
-      segment = NULL;
-    }
-  else
-    segment = (gchar*) array->data;
+		g_free( array->data );
+		segment = NULL;
+	}
+	else
+		segment = ( gchar * ) array->data;
 
-  if (flags & PRESERVE_WRAPPER)
-    {
-      array->data            = NULL;
-      array->len             = 0;
-      array->alloc           = 0;
-    }
-  else
-    {
-      //g_slice_free1 (sizeof (GRealArray), array);
-      free (array);
-    }
+	if( flags & PRESERVE_WRAPPER )
+	{
+		array->data            = NULL;
+		array->len             = 0;
+		array->alloc           = 0;
+	}
+	else
+	{
+		//g_slice_free1 (sizeof (GRealArray), array);
+		free( array );
+	}
 
-  return segment;
+	return segment;
 }
 
 /**
@@ -413,25 +396,22 @@ array_free (GRealArray     *array,
  * to the value parameter @v. This means that you cannot use it with
  * literal values such as "27". You must use variables.</para></note>
  **/
-GArray*
-g_array_append_vals (GArray       *farray,
-		     gconstpointer data,
-		     unsigned int         len)
+GArray *g_array_append_vals( GArray *farray, gconstpointer data, guint len )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_array_maybe_expand (array, len);
+	g_array_maybe_expand( array, len );
 
-  memcpy (g_array_elt_pos (array, array->len), data, 
-	  g_array_elt_len (array, len));
+	memcpy( g_array_elt_pos( array, array->len ), data,
+	        g_array_elt_len( array, len ) );
 
-  array->len += len;
+	array->len += len;
 
-  g_array_zero_terminate (array);
+	g_array_zero_terminate( array );
 
-  return farray;
+	return farray;
 }
 
 /**
@@ -465,27 +445,24 @@ g_array_append_vals (GArray       *farray,
  * to the value parameter @v. This means that you cannot use it with
  * literal values such as "27". You must use variables.</para></note>
  **/
-GArray*
-g_array_prepend_vals (GArray        *farray,
-		      gconstpointer  data,
-		      unsigned int          len)
+GArray *g_array_prepend_vals( GArray *farray, gconstpointer  data, guint len )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_array_maybe_expand (array, len);
+	g_array_maybe_expand( array, len );
 
-  memmove (g_array_elt_pos (array, len), g_array_elt_pos (array, 0), 
-	     g_array_elt_len (array, array->len));
+	memmove( g_array_elt_pos( array, len ), g_array_elt_pos( array, 0 ),
+		g_array_elt_len( array, array->len ) );
 
-  memcpy (g_array_elt_pos (array, 0), data, g_array_elt_len (array, len));
+	memcpy( g_array_elt_pos( array, 0 ), data, g_array_elt_len( array, len ) );
 
-  array->len += len;
+	array->len += len;
 
-  g_array_zero_terminate (array);
+	g_array_zero_terminate( array );
 
-  return farray;
+	return farray;
 }
 
 /**
@@ -511,29 +488,25 @@ g_array_prepend_vals (GArray        *farray,
  * to the value parameter @v. This means that you cannot use it with
  * literal values such as "27". You must use variables.</para></note>
  **/
-GArray*
-g_array_insert_vals (GArray        *farray,
-		     unsigned int          index_,
-		     gconstpointer  data,
-		     unsigned int          len)
+GArray *g_array_insert_vals( GArray *farray, guint index_, gconstpointer  data, guint len )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_array_maybe_expand (array, len);
+	g_array_maybe_expand( array, len );
 
-  memmove (g_array_elt_pos (array, len + index_), 
-	     g_array_elt_pos (array, index_), 
-	     g_array_elt_len (array, array->len - index_));
+	memmove( g_array_elt_pos( array, len + index_ ),
+	         g_array_elt_pos( array, index_ ),
+	         g_array_elt_len( array, array->len - index_ ) );
 
-  memcpy (g_array_elt_pos (array, index_), data, g_array_elt_len (array, len));
+	memcpy( g_array_elt_pos( array, index_ ), data, g_array_elt_len( array, len ) );
 
-  array->len += len;
+	array->len += len;
 
-  g_array_zero_terminate (array);
+	g_array_zero_terminate( array );
 
-  return farray;
+	return farray;
 }
 
 /**
@@ -545,29 +518,27 @@ g_array_insert_vals (GArray        *farray,
  * Sets the size of the array, expanding it if necessary. If the array
  * was created with @clear_ set to %TRUE, the new elements are set to 0.
  **/
-GArray*
-g_array_set_size (GArray *farray,
-		  unsigned int   length)
+GArray *g_array_set_size( GArray *farray, guint length )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  if (length > array->len)
-    {
-      g_array_maybe_expand (array, length - array->len);
-      
-      if (array->clear)
-	g_array_elt_zero (array, array->len, length - array->len);
-    }
-  else if (length < array->len)
-    g_array_remove_range (farray, length, array->len - length);
-  
-  array->len = length;
-  
-  g_array_zero_terminate (array);
-  
-  return farray;
+	if( length > array->len )
+	{
+		g_array_maybe_expand( array, length - array->len );
+
+		if( array->clear )
+			g_array_elt_zero( array, array->len, length - array->len );
+	}
+	else if( length < array->len )
+		g_array_remove_range( farray, length, array->len - length );
+
+	array->len = length;
+
+	g_array_zero_terminate( array );
+
+	return farray;
 }
 
 /**
@@ -579,32 +550,30 @@ g_array_set_size (GArray *farray,
  * Removes the element at the given index from a #GArray. The following
  * elements are moved down one place.
  **/
-GArray*
-g_array_remove_index (GArray *farray,
-		      unsigned int   index_)
+GArray *g_array_remove_index( GArray *farray, guint index_ )
 {
-  GRealArray* array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_return_val_if_fail (index_ < array->len, NULL);
+	g_return_val_if_fail( index_ < array->len, NULL );
 
-  if (array->clear_func != NULL)
-    array->clear_func (g_array_elt_pos (array, index_));
+	if( array->clear_func != NULL )
+		array->clear_func( g_array_elt_pos( array, index_ ) );
 
-  if (index_ != array->len - 1)
-    memmove (g_array_elt_pos (array, index_),
-               g_array_elt_pos (array, index_ + 1),
-               g_array_elt_len (array, array->len - index_ - 1));
+	if( index_ != array->len - 1 )
+		memmove( g_array_elt_pos( array, index_ ),
+		         g_array_elt_pos( array, index_ + 1 ),
+		         g_array_elt_len( array, array->len - index_ - 1 ) );
 
-  array->len -= 1;
+	array->len -= 1;
 
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  g_array_elt_zero (array, array->len, 1);
-  //else
-    g_array_zero_terminate (array);
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  g_array_elt_zero (array, array->len, 1);
+	//else
+	g_array_zero_terminate( array );
 
-  return farray;
+	return farray;
 }
 
 /**
@@ -618,32 +587,30 @@ g_array_remove_index (GArray *farray,
  * does not preserve the order of the #GArray. But it is faster than
  * g_array_remove_index().
  **/
-GArray*
-g_array_remove_index_fast (GArray *farray,
-			   unsigned int   index_)
+GArray *g_array_remove_index_fast( GArray *farray, guint index_ )
 {
-  GRealArray* array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_return_val_if_fail (index_ < array->len, NULL);
+	g_return_val_if_fail( index_ < array->len, NULL );
 
-  if (array->clear_func != NULL)
-    array->clear_func (g_array_elt_pos (array, index_));
+	if( array->clear_func != NULL )
+		array->clear_func( g_array_elt_pos( array, index_ ) );
 
-  if (index_ != array->len - 1)
-    memcpy (g_array_elt_pos (array, index_),
-            g_array_elt_pos (array, array->len - 1),
-            g_array_elt_len (array, 1));
-  
-  array->len -= 1;
+	if( index_ != array->len - 1 )
+		memcpy( g_array_elt_pos( array, index_ ),
+		        g_array_elt_pos( array, array->len - 1 ),
+		        g_array_elt_len( array, 1 ) );
 
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  g_array_elt_zero (array, array->len, 1);
-  //else
-    g_array_zero_terminate (array);
+	array->len -= 1;
 
-  return farray;
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  g_array_elt_zero (array, array->len, 1);
+	//else
+	g_array_zero_terminate( array );
+
+	return farray;
 }
 
 /**
@@ -658,37 +625,34 @@ g_array_remove_index_fast (GArray *farray,
  *
  * Since: 2.4
  **/
-GArray*
-g_array_remove_range (GArray *farray,
-                      unsigned int   index_,
-                      unsigned int   length)
+GArray *g_array_remove_range( GArray *farray, guint index_, guint length )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_val_if_fail (array, NULL);
-  g_return_val_if_fail (index_ < array->len, NULL);
-  g_return_val_if_fail (index_ + length <= array->len, NULL);
+	g_return_val_if_fail( array, NULL );
+	g_return_val_if_fail( index_ < array->len, NULL );
+	g_return_val_if_fail( index_ + length <= array->len, NULL );
 
-  if (array->clear_func != NULL)
-    {
-      unsigned int i;
+	if( array->clear_func != NULL )
+	{
+		guint i;
 
-      for (i = 0; i < length; i++)
-        array->clear_func (g_array_elt_pos (array, index_ + i));
-    }
+		for( i = 0; i < length; i++ )
+			array->clear_func( g_array_elt_pos( array, index_ + i ) );
+	}
 
-  if (index_ + length != array->len)
-    memmove (g_array_elt_pos (array, index_),
-               g_array_elt_pos (array, index_ + length),
-               (array->len - (index_ + length)) * array->elt_size);
+	if( index_ + length != array->len )
+		memmove( g_array_elt_pos( array, index_ ),
+		         g_array_elt_pos( array, index_ + length ),
+		         ( array->len - ( index_ + length ) ) * array->elt_size );
 
-  array->len -= length;
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  g_array_elt_zero (array, array->len, length);
-  //else
-    g_array_zero_terminate (array);
+	array->len -= length;
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  g_array_elt_zero (array, array->len, length);
+	//else
+	g_array_zero_terminate( array );
 
-  return farray;
+	return farray;
 }
 
 /**
@@ -703,20 +667,14 @@ g_array_remove_range (GArray *farray,
  *
  * This is guaranteed to be a stable sort since version 2.32.
  **/
-void
-g_array_sort (GArray       *farray,
-	      GCompareFunc  compare_func)
+void g_array_sort( GArray *farray, GCompareFunc compare_func )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_if_fail (array != NULL);
+	g_return_if_fail( array != NULL );
 
-  /* Don't use qsort as we want a guaranteed stable sort */
-  g_qsort_with_data (array->data,
-		     array->len,
-		     array->elt_size,
-		     (GCompareDataFunc)compare_func,
-		     NULL);
+	/* Don't use qsort as we want a guaranteed stable sort */
+	g_qsort_with_data( array->data, array->len, array->elt_size, ( GCompareDataFunc )compare_func, NULL );
 }
 
 /**
@@ -734,55 +692,45 @@ g_array_sort (GArray       *farray,
  * using the addresses of the elements in the comparison function.
  * This did not actually work, so any such code should be removed.
  **/
-void
-g_array_sort_with_data (GArray           *farray,
-			GCompareDataFunc  compare_func,
-			gpointer          user_data)
+void g_array_sort_with_data( GArray *farray, GCompareDataFunc compare_func, gpointer user_data )
 {
-  GRealArray *array = (GRealArray*) farray;
+	GRealArray *array = ( GRealArray * ) farray;
 
-  g_return_if_fail (array != NULL);
+	g_return_if_fail( array != NULL );
 
-  g_qsort_with_data (array->data,
-		     array->len,
-		     array->elt_size,
-		     compare_func,
-		     user_data);
+	g_qsort_with_data( array->data, array->len, array->elt_size, compare_func, user_data );
 }
 
 /* Returns the smallest power of 2 greater than n, or n if
  * such power does not fit in a unsigned int
  */
-static unsigned int
-g_nearest_pow (int num)
+static unsigned int g_nearest_pow( int num )
 {
-  unsigned int n = 1;
+	guint n = 1;
 
-  while (n < num && n > 0)
-    n <<= 1;
+	while( n < num && n > 0 )
+		n <<= 1;
 
-  return n ? n : num;
+	return n ? n : num;
 }
 
 static void
-g_array_maybe_expand (GRealArray *array,
-		      int        len)
+g_array_maybe_expand( GRealArray *array, int len )
 {
-  unsigned int want_alloc = g_array_elt_len (array, array->len + len + 
-				      array->zero_terminated);
+	guint want_alloc = g_array_elt_len( array, array->len + len + array->zero_terminated );
 
-  if (want_alloc > array->alloc)
-    {
-      want_alloc = g_nearest_pow (want_alloc);
-      want_alloc = MAX (want_alloc, MIN_ARRAY_SIZE);
+	if( want_alloc > array->alloc )
+	{
+		want_alloc = g_nearest_pow( want_alloc );
+		want_alloc = MAX( want_alloc, MIN_ARRAY_SIZE );
 
-      array->data = (unsigned char *) realloc (array->data, want_alloc);
+		array->data = ( guchar * ) realloc( array->data, want_alloc );
 
-      //if (G_UNLIKELY (g_mem_gc_friendly))
-      //  memset (array->data + array->alloc, 0, want_alloc - array->alloc);
+		//if (G_UNLIKELY (g_mem_gc_friendly))
+		//  memset (array->data + array->alloc, 0, want_alloc - array->alloc);
 
-      array->alloc = want_alloc;
-    }
+		array->alloc = want_alloc;
+	}
 }
 
 /**
@@ -845,11 +793,11 @@ typedef struct _GRealPtrArray  GRealPtrArray;
  **/
 struct _GRealPtrArray
 {
-  gpointer     *pdata;
-  unsigned int         len;
-  unsigned int         alloc;
-  int          ref_count;
-  GDestroyNotify element_free_func;
+	gpointer *pdata;
+	guint len;
+	guint alloc;
+	int ref_count;
+	GDestroyNotify element_free_func;
 };
 
 /**
@@ -861,8 +809,7 @@ struct _GRealPtrArray
  * Returns the pointer at the given index of the pointer array.
  **/
 
-static void g_ptr_array_maybe_expand (GRealPtrArray *array,
-				      int           len);
+static void g_ptr_array_maybe_expand( GRealPtrArray *array,  int len );
 
 /**
  * g_ptr_array_new:
@@ -870,10 +817,9 @@ static void g_ptr_array_maybe_expand (GRealPtrArray *array,
  *
  * Creates a new #GPtrArray with a reference count of 1.
  **/
-GPtrArray*
-g_ptr_array_new (void)
+GPtrArray *g_ptr_array_new( void )
 {
-  return g_ptr_array_sized_new (0);
+	return g_ptr_array_sized_new( 0 );
 }
 
 /**
@@ -886,22 +832,21 @@ g_ptr_array_new (void)
  * you are going to add many pointers to the array. Note however that
  * the size of the array is still 0.
  **/
-GPtrArray*  
-g_ptr_array_sized_new (unsigned int reserved_size)
+GPtrArray *g_ptr_array_sized_new( guint reserved_size )
 {
-  //GRealPtrArray *array = g_slice_new (GRealPtrArray);
-  GRealPtrArray *array = (GRealPtrArray *) malloc (sizeof(GRealPtrArray));
+	//GRealPtrArray *array = g_slice_new (GRealPtrArray);
+	GRealPtrArray *array = ( GRealPtrArray * ) malloc( sizeof( GRealPtrArray ) );
 
-  array->pdata = NULL;
-  array->len = 0;
-  array->alloc = 0;
-  array->ref_count = 1;
-  array->element_free_func = NULL;
+	array->pdata = NULL;
+	array->len = 0;
+	array->alloc = 0;
+	array->ref_count = 1;
+	array->element_free_func = NULL;
 
-  if (reserved_size != 0)
-    g_ptr_array_maybe_expand (array, reserved_size);
+	if( reserved_size != 0 )
+		g_ptr_array_maybe_expand( array, reserved_size );
 
-  return (GPtrArray*) array;  
+	return ( GPtrArray * ) array;
 }
 
 /**
@@ -917,14 +862,13 @@ g_ptr_array_sized_new (unsigned int reserved_size)
  *
  * Since: 2.22
  **/
-GPtrArray *
-g_ptr_array_new_with_free_func (GDestroyNotify element_free_func)
+GPtrArray *g_ptr_array_new_with_free_func( GDestroyNotify element_free_func )
 {
-  GPtrArray *array;
+	GPtrArray *array;
 
-  array = g_ptr_array_new ();
-  g_ptr_array_set_free_func (array, element_free_func);
-  return array;
+	array = g_ptr_array_new();
+	g_ptr_array_set_free_func( array, element_free_func );
+	return array;
 }
 
 /**
@@ -944,15 +888,13 @@ g_ptr_array_new_with_free_func (GDestroyNotify element_free_func)
  *
  * Since: 2.30
  **/
-GPtrArray *
-g_ptr_array_new_full (unsigned int          reserved_size,
-                      GDestroyNotify element_free_func)
+GPtrArray *g_ptr_array_new_full( guint reserved_size, GDestroyNotify element_free_func )
 {
-  GPtrArray *array;
+	GPtrArray *array;
 
-  array = g_ptr_array_sized_new (reserved_size);
-  g_ptr_array_set_free_func (array, element_free_func);
-  return array;
+	array = g_ptr_array_sized_new( reserved_size );
+	g_ptr_array_set_free_func( array, element_free_func );
+	return array;
 }
 
 /**
@@ -967,14 +909,13 @@ g_ptr_array_new_full (unsigned int          reserved_size,
  * Since: 2.22
  **/
 void
-g_ptr_array_set_free_func (GPtrArray        *array,
-                           GDestroyNotify    element_free_func)
+g_ptr_array_set_free_func( GPtrArray *array, GDestroyNotify element_free_func )
 {
-  GRealPtrArray* rarray = (GRealPtrArray*) array;
+	GRealPtrArray *rarray = ( GRealPtrArray * ) array;
 
-  g_return_if_fail (array);
+	g_return_if_fail( array );
 
-  rarray->element_free_func = element_free_func;
+	rarray->element_free_func = element_free_func;
 }
 
 /**
@@ -988,19 +929,18 @@ g_ptr_array_set_free_func (GPtrArray        *array,
  *
  * Since: 2.22
  **/
-GPtrArray *
-g_ptr_array_ref (GPtrArray *array)
+GPtrArray *g_ptr_array_ref( GPtrArray *array )
 {
-  GRealPtrArray *rarray = (GRealPtrArray*) array;
+	GRealPtrArray *rarray = ( GRealPtrArray * ) array;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_atomic_int_inc (&rarray->ref_count);
+	g_atomic_int_inc( &rarray->ref_count );
 
-  return array;
+	return array;
 }
 
-static gpointer *ptr_array_free (GPtrArray *,enum ArrayFreeFlags);
+static gpointer *ptr_array_free( GPtrArray *, enum ArrayFreeFlags );
 
 /**
  * g_ptr_array_unref:
@@ -1014,13 +954,13 @@ static gpointer *ptr_array_free (GPtrArray *,enum ArrayFreeFlags);
  * Since: 2.22
  **/
 void
-g_ptr_array_unref (GPtrArray *array)
+g_ptr_array_unref( GPtrArray *array )
 {
-  GRealPtrArray *rarray = (GRealPtrArray*) array;
-  g_return_if_fail (array);
+	GRealPtrArray *rarray = ( GRealPtrArray * ) array;
+	g_return_if_fail( array );
 
-  if (g_atomic_int_dec_and_test (&rarray->ref_count))
-    ptr_array_free (array, FREE_SEGMENT);
+	if( g_atomic_int_dec_and_test( &rarray->ref_count ) )
+		ptr_array_free( array, FREE_SEGMENT );
 }
 
 /**
@@ -1041,70 +981,64 @@ g_ptr_array_unref (GPtrArray *array)
  * memory, they should be freed separately if @free_seg is %TRUE and no
  * #GDestroyNotify function has been set for @array.</para></note>
  **/
-gpointer*
-g_ptr_array_free (GPtrArray *farray,
-		  gboolean   free_segment)
+gpointer *g_ptr_array_free( GPtrArray *farray, gboolean free_segment )
 {
-  GRealPtrArray *array = (GRealPtrArray*) farray;
-  enum ArrayFreeFlags flags;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	enum ArrayFreeFlags flags;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  flags = (ArrayFreeFlags) (free_segment ? FREE_SEGMENT : 0);
+	flags = ( ArrayFreeFlags )( free_segment ? FREE_SEGMENT : 0 );
 
-  /* if others are holding a reference, preserve the wrapper but do free/return the data */
-  if (!g_atomic_int_dec_and_test (&array->ref_count))
-    flags |= PRESERVE_WRAPPER;
+	/* if others are holding a reference, preserve the wrapper but do free/return the data */
+	if( !g_atomic_int_dec_and_test( &array->ref_count ) )
+		flags |= PRESERVE_WRAPPER;
 
-  return ptr_array_free (farray, flags);
+	return ptr_array_free( farray, flags );
 }
 
-static gpointer *
-ptr_array_free (GPtrArray      *farray,
-               enum ArrayFreeFlags  flags)
+static gpointer *ptr_array_free( GPtrArray *farray, enum ArrayFreeFlags flags )
 {
-  GRealPtrArray *array = (GRealPtrArray*) farray;
-  gpointer *segment;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	gpointer *segment;
 
-  if (flags & FREE_SEGMENT)
-    {
-      if (array->element_free_func != NULL)
-        g_ptr_array_foreach (farray, (GFunc) array->element_free_func, NULL);
-      g_free (array->pdata);
-      segment = NULL;
-    }
-  else
-    segment = array->pdata;
+	if( flags & FREE_SEGMENT )
+	{
+		if( array->element_free_func != NULL )
+			g_ptr_array_foreach( farray, ( GFunc ) array->element_free_func, NULL );
+		g_free( array->pdata );
+		segment = NULL;
+	}
+	else
+		segment = array->pdata;
 
-  if (flags & PRESERVE_WRAPPER)
-    {
-      array->pdata = NULL;
-      array->len = 0;
-      array->alloc = 0;
-    }
-  else
-    {
-      //g_slice_free1 (sizeof (GRealPtrArray), array);
-      free (array);
-    }
+	if( flags & PRESERVE_WRAPPER )
+	{
+		array->pdata = NULL;
+		array->len = 0;
+		array->alloc = 0;
+	}
+	else
+	{
+		//g_slice_free1 (sizeof (GRealPtrArray), array);
+		free( array );
+	}
 
-  return segment;
+	return segment;
 }
 
-static void
-g_ptr_array_maybe_expand (GRealPtrArray *array,
-			  int           len)
+static void g_ptr_array_maybe_expand( GRealPtrArray *array, int len )
 {
-  if ((array->len + len) > array->alloc)
-    {
-      unsigned int old_alloc = array->alloc;
-      array->alloc = g_nearest_pow (array->len + len);
-      array->alloc = MAX (array->alloc, MIN_ARRAY_SIZE);
-      array->pdata = realloc (array->pdata, sizeof (gpointer) * array->alloc);
-      //if (G_UNLIKELY (g_mem_gc_friendly))
-      //  for ( ; old_alloc < array->alloc; old_alloc++)
-      //    array->pdata [old_alloc] = NULL;
-    }
+	if( ( array->len + len ) > array->alloc )
+	{
+		guint old_alloc = array->alloc;
+		array->alloc = g_nearest_pow( array->len + len );
+		array->alloc = MAX( array->alloc, MIN_ARRAY_SIZE );
+		array->pdata = realloc( array->pdata, sizeof( gpointer ) * array->alloc );
+		//if (G_UNLIKELY (g_mem_gc_friendly))
+		//  for ( ; old_alloc < array->alloc; old_alloc++)
+		//    array->pdata [old_alloc] = NULL;
+	}
 }
 
 /**
@@ -1117,31 +1051,29 @@ g_ptr_array_maybe_expand (GRealPtrArray *array,
  * if @array has a non-%NULL #GDestroyNotify function then it will be
  * called for the removed elements.
  **/
-void
-g_ptr_array_set_size  (GPtrArray *farray,
-		       int	  length)
+void g_ptr_array_set_size( GPtrArray *farray, int length )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
 
-  g_return_if_fail (array);
+	g_return_if_fail( array );
 
-  if (length > array->len)
-    {
-      int i;
-      g_ptr_array_maybe_expand (array, (length - array->len));
-      /* This is not 
-       *     memset (array->pdata + array->len, 0,
-       *            sizeof (gpointer) * (length - array->len));
-       * to make it really portable. Remember (void*)NULL needn't be
-       * bitwise zero. It of course is silly not to use memset (..,0,..).
-       */
-      for (i = array->len; i < length; i++)
-	array->pdata[i] = NULL;
-    }
-  else if (length < array->len)
-    g_ptr_array_remove_range (farray, length, array->len - length);
+	if( length > array->len )
+	{
+		int i;
+		g_ptr_array_maybe_expand( array, ( length - array->len ) );
+		/* This is not
+		 *     memset (array->pdata + array->len, 0,
+		 *            sizeof (gpointer) * (length - array->len));
+		 * to make it really portable. Remember (void*)NULL needn't be
+		 * bitwise zero. It of course is silly not to use memset (..,0,..).
+		 */
+		for( i = array->len; i < length; i++ )
+			array->pdata[i] = NULL;
+	}
+	else if( length < array->len )
+		g_ptr_array_remove_range( farray, length, array->len - length );
 
-  array->len = length;
+	array->len = length;
 }
 
 /**
@@ -1155,32 +1087,29 @@ g_ptr_array_set_size  (GPtrArray *farray,
  * non-%NULL #GDestroyNotify function it is called for the removed
  * element.
  **/
-gpointer
-g_ptr_array_remove_index (GPtrArray *farray,
-			  unsigned int      index_)
+gpointer g_ptr_array_remove_index( GPtrArray *farray, guint index_ )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
-  gpointer result;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	gpointer result;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_return_val_if_fail (index_ < array->len, NULL);
+	g_return_val_if_fail( index_ < array->len, NULL );
 
-  result = array->pdata[index_];
-  
-  if (array->element_free_func != NULL)
-    array->element_free_func (array->pdata[index_]);
+	result = array->pdata[index_];
 
-  if (index_ != array->len - 1)
-    memmove (array->pdata + index_, array->pdata + index_ + 1, 
-               sizeof (gpointer) * (array->len - index_ - 1));
-  
-  array->len -= 1;
+	if( array->element_free_func != NULL )
+		array->element_free_func( array->pdata[index_] );
 
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  array->pdata[array->len] = NULL;
+	if( index_ != array->len - 1 )
+		memmove( array->pdata + index_, array->pdata + index_ + 1, sizeof( gpointer ) * ( array->len - index_ - 1 ) );
 
-  return result;
+	array->len -= 1;
+
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  array->pdata[array->len] = NULL;
+
+	return result;
 }
 
 /**
@@ -1195,31 +1124,29 @@ g_ptr_array_remove_index (GPtrArray *farray,
  * than g_ptr_array_remove_index(). If @array has a non-%NULL
  * #GDestroyNotify function it is called for the removed element.
  **/
-gpointer
-g_ptr_array_remove_index_fast (GPtrArray *farray,
-			       unsigned int      index_)
+gpointer g_ptr_array_remove_index_fast( GPtrArray *farray, guint index_ )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
-  gpointer result;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	gpointer result;
 
-  g_return_val_if_fail (array, NULL);
+	g_return_val_if_fail( array, NULL );
 
-  g_return_val_if_fail (index_ < array->len, NULL);
+	g_return_val_if_fail( index_ < array->len, NULL );
 
-  result = array->pdata[index_];
+	result = array->pdata[index_];
 
-  if (array->element_free_func != NULL)
-    array->element_free_func (array->pdata[index_]);
+	if( array->element_free_func != NULL )
+		array->element_free_func( array->pdata[index_] );
 
-  if (index_ != array->len - 1)
-    array->pdata[index_] = array->pdata[array->len - 1];
+	if( index_ != array->len - 1 )
+		array->pdata[index_] = array->pdata[array->len - 1];
 
-  array->len -= 1;
+	array->len -= 1;
 
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  array->pdata[array->len] = NULL;
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  array->pdata[array->len] = NULL;
 
-  return result;
+	return result;
 }
 
 /**
@@ -1235,38 +1162,35 @@ g_ptr_array_remove_index_fast (GPtrArray *farray,
  *
  * Since: 2.4
  **/
-void
-g_ptr_array_remove_range (GPtrArray *farray,
-                          unsigned int      index_,
-                          unsigned int      length)
+void g_ptr_array_remove_range( GPtrArray *farray, guint index_, guint length )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
-  unsigned int n;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	guint n;
 
-  g_return_if_fail (array);
-  g_return_if_fail (index_ < array->len);
-  g_return_if_fail (index_ + length <= array->len);
+	g_return_if_fail( array );
+	g_return_if_fail( index_ < array->len );
+	g_return_if_fail( index_ + length <= array->len );
 
-  if (array->element_free_func != NULL)
-    {
-      for (n = index_; n < index_ + length; n++)
-        array->element_free_func (array->pdata[n]);
-    }
+	if( array->element_free_func != NULL )
+	{
+		for( n = index_; n < index_ + length; n++ )
+			array->element_free_func( array->pdata[n] );
+	}
 
-  if (index_ + length != array->len)
-    {
-      memmove (&array->pdata[index_],
-                 &array->pdata[index_ + length], 
-                 (array->len - (index_ + length)) * sizeof (gpointer));
-    }
+	if( index_ + length != array->len )
+	{
+		memmove( &array->pdata[index_],
+		         &array->pdata[index_ + length],
+		         ( array->len - ( index_ + length ) ) * sizeof( gpointer ) );
+	}
 
-  array->len -= length;
-  //if (G_UNLIKELY (g_mem_gc_friendly))
-  //  {
-  //    unsigned int i;
-  //    for (i = 0; i < length; i++)
-  //      array->pdata[array->len + i] = NULL;
-  //  }
+	array->len -= length;
+	//if (G_UNLIKELY (g_mem_gc_friendly))
+	//  {
+	//    guint i;
+	//    for (i = 0; i < length; i++)
+	//      array->pdata[array->len + i] = NULL;
+	//  }
 }
 
 /**
@@ -1284,25 +1208,23 @@ g_ptr_array_remove_range (GPtrArray *farray,
  * It returns %TRUE if the pointer was removed, or %FALSE if the
  * pointer was not found.
  **/
-gboolean
-g_ptr_array_remove (GPtrArray *farray,
-		    gpointer   data)
+gboolean g_ptr_array_remove( GPtrArray *farray, gpointer data )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
-  unsigned int i;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	guint i;
 
-  g_return_val_if_fail (array, false);
+	g_return_val_if_fail( array, false );
 
-  for (i = 0; i < array->len; i += 1)
-    {
-      if (array->pdata[i] == data)
+	for( i = 0; i < array->len; i += 1 )
 	{
-	  g_ptr_array_remove_index (farray, i);
-	  return true;
+		if( array->pdata[i] == data )
+		{
+			g_ptr_array_remove_index( farray, i );
+			return true;
+		}
 	}
-    }
 
-  return false;
+	return false;
 }
 
 /**
@@ -1320,25 +1242,23 @@ g_ptr_array_remove (GPtrArray *farray,
  * It returns %TRUE if the pointer was removed, or %FALSE if the
  * pointer was not found.
  **/
-gboolean
-g_ptr_array_remove_fast (GPtrArray *farray,
-			 gpointer   data)
+gboolean g_ptr_array_remove_fast( GPtrArray *farray, gpointer data )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
-  unsigned int i;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
+	guint i;
 
-  g_return_val_if_fail (array, false);
+	g_return_val_if_fail( array, false );
 
-  for (i = 0; i < array->len; i += 1)
-    {
-      if (array->pdata[i] == data)
+	for( i = 0; i < array->len; i += 1 )
 	{
-	  g_ptr_array_remove_index_fast (farray, i);
-	  return true;
+		if( array->pdata[i] == data )
+		{
+			g_ptr_array_remove_index_fast( farray, i );
+			return true;
+		}
 	}
-    }
 
-  return false;
+	return false;
 }
 
 /**
@@ -1349,17 +1269,15 @@ g_ptr_array_remove_fast (GPtrArray *farray,
  * Adds a pointer to the end of the pointer array. The array will grow
  * in size automatically if necessary.
  **/
-void
-g_ptr_array_add (GPtrArray *farray,
-		 gpointer   data)
+void g_ptr_array_add( GPtrArray *farray, gpointer data )
 {
-  GRealPtrArray* array = (GRealPtrArray*) farray;
+	GRealPtrArray *array = ( GRealPtrArray * ) farray;
 
-  g_return_if_fail (array);
+	g_return_if_fail( array );
 
-  g_ptr_array_maybe_expand (array, 1);
+	g_ptr_array_maybe_expand( array, 1 );
 
-  array->pdata[array->len++] = data;
+	array->pdata[array->len++] = data;
 }
 
 /**
@@ -1378,18 +1296,12 @@ g_ptr_array_add (GPtrArray *farray,
  *
  * This is guaranteed to be a stable sort since version 2.32.
  **/
-void
-g_ptr_array_sort (GPtrArray    *array,
-		  GCompareFunc  compare_func)
+void g_ptr_array_sort( GPtrArray *array, GCompareFunc compare_func )
 {
-  g_return_if_fail (array != NULL);
+	g_return_if_fail( array != NULL );
 
-  /* Don't use qsort as we want a guaranteed stable sort */
-  g_qsort_with_data (array->pdata,
-		     array->len,
-		     sizeof (gpointer),
-		     (GCompareDataFunc)compare_func,
-		     NULL);
+	/* Don't use qsort as we want a guaranteed stable sort */
+	g_qsort_with_data( array->pdata, array->len, sizeof( gpointer ), ( GCompareDataFunc ) compare_func, NULL );
 }
 
 /**
@@ -1407,18 +1319,15 @@ g_ptr_array_sort (GPtrArray    *array,
  *
  * This is guaranteed to be a stable sort since version 2.32.
  **/
-void
-g_ptr_array_sort_with_data (GPtrArray        *array,
-			    GCompareDataFunc  compare_func,
-			    gpointer          user_data)
+void g_ptr_array_sort_with_data( GPtrArray *array, GCompareDataFunc compare_func, gpointer user_data )
 {
-  g_return_if_fail (array != NULL);
+	g_return_if_fail( array != NULL );
 
-  g_qsort_with_data (array->pdata,
-		     array->len,
-		     sizeof (gpointer),
-		     compare_func,
-		     user_data);
+	g_qsort_with_data( array->pdata,
+	                   array->len,
+	                   sizeof( gpointer ),
+	                   compare_func,
+	                   user_data );
 }
 
 /**
@@ -1426,22 +1335,19 @@ g_ptr_array_sort_with_data (GPtrArray        *array,
  * @array: a #GPtrArray
  * @func: the function to call for each array element
  * @user_data: user data to pass to the function
- * 
+ *
  * Calls a function for each element of a #GPtrArray.
  *
  * Since: 2.4
  **/
-void
-g_ptr_array_foreach (GPtrArray *array,
-                     GFunc      func,
-                     gpointer   user_data)
+void g_ptr_array_foreach( GPtrArray *array, GFunc func, gpointer user_data )
 {
-  unsigned int i;
+	guint i;
 
-  g_return_if_fail (array);
+	g_return_if_fail( array );
 
-  for (i = 0; i < array->len; i++)
-    (*func) (array->pdata[i], user_data);
+	for( i = 0; i < array->len; i++ )
+		( *func )( array->pdata[i], user_data );
 }
 
 /**
@@ -1467,7 +1373,7 @@ g_ptr_array_foreach (GPtrArray *array,
  *
  *   gbarray = g_byte_array_new (<!-- -->);
  *   for (i = 0; i &lt; 10000; i++)
- *     g_byte_array_append (gbarray, (unsigned char*) "abcd", 4);
+ *     g_byte_array_append (gbarray, (guchar*) "abcd", 4);
  *
  *   for (i = 0; i &lt; 10000; i++)
  *     {
@@ -1501,9 +1407,9 @@ g_ptr_array_foreach (GPtrArray *array,
  *
  * Creates a new #GByteArray with a reference count of 1.
  **/
-GByteArray* g_byte_array_new (void)
+GByteArray *g_byte_array_new( void )
 {
-  return (GByteArray*) g_array_sized_new (false, false, 1, 0);
+	return ( GByteArray * ) g_array_sized_new( false, false, 1, 0 );
 }
 
 /**
@@ -1518,25 +1424,23 @@ GByteArray* g_byte_array_new (void)
  *
  * Returns: (transfer full): a new #GByteArray
  */
-GByteArray *
-g_byte_array_new_take (unsigned char *data,
-                       size_t   len)
+GByteArray *g_byte_array_new_take( guchar *data, gsize len )
 {
-  GByteArray *array;
-  GRealArray *real;
+	GByteArray *array;
+	GRealArray *real;
 
-  array = g_byte_array_new ();
-  real = (GRealArray *)array;
-  
-  //g_assert (real->data == NULL);
-  if (real->data == NULL) return NULL;
-  //g_assert (real->len == 0);
-  if (real->len == 0) return NULL;
+	array = g_byte_array_new();
+	real = ( GRealArray * )array;
 
-  real->data = data;
-  real->len = len;
+	//g_assert (real->data == NULL);
+	if( real->data == NULL ) return NULL;
+	//g_assert (real->len == 0);
+	if( real->len == 0 ) return NULL;
 
-  return array;
+	real->data = data;
+	real->len = len;
+
+	return array;
 }
 
 /**
@@ -1549,9 +1453,9 @@ g_byte_array_new_take (unsigned char *data,
  * bytes to the array. Note however that the size of the array is still
  * 0.
  **/
-GByteArray* g_byte_array_sized_new (unsigned int reserved_size)
+GByteArray *g_byte_array_sized_new( guint reserved_size )
 {
-  return (GByteArray*) g_array_sized_new (false, false, 1, reserved_size);
+	return ( GByteArray * ) g_array_sized_new( false, false, 1, reserved_size );
 }
 
 /**
@@ -1566,10 +1470,9 @@ GByteArray* g_byte_array_sized_new (unsigned int reserved_size)
  * @array is greater than one, the #GByteArray wrapper is preserved but
  * the size of @array will be set to zero.
  **/
-unsigned char*	    g_byte_array_free     (GByteArray *array,
-			           gboolean    free_segment)
+guchar *g_byte_array_free( GByteArray *array, gboolean free_segment )
 {
-  return (unsigned char*) g_array_free ((GArray*) array, free_segment);
+	return ( guchar * ) g_array_free( ( GArray * ) array, free_segment );
 }
 
 /**
@@ -1590,15 +1493,14 @@ unsigned char*	    g_byte_array_free     (GByteArray *array,
  * Returns: (transfer full): a new immutable #GBytes representing same byte
  *          data that was in the array
  */
-GBytes *
-g_byte_array_free_to_bytes (GByteArray *array)
+GBytes *g_byte_array_free_to_bytes( GByteArray *array )
 {
-  size_t length;
+	gsize length;
 
-  g_return_val_if_fail (array != NULL, NULL);
+	g_return_val_if_fail( array != NULL, NULL );
 
-  length = array->len;
-  return g_bytes_new_take (g_byte_array_free (array, false), length);
+	length = array->len;
+	return g_bytes_new_take( g_byte_array_free( array, false ), length );
 }
 
 /**
@@ -1612,10 +1514,9 @@ g_byte_array_free_to_bytes (GByteArray *array)
  *
  * Since: 2.22
  **/
-GByteArray *
-g_byte_array_ref (GByteArray *array)
+GByteArray *g_byte_array_ref( GByteArray *array )
 {
-  return (GByteArray *) g_array_ref ((GArray *) array);
+	return ( GByteArray * ) g_array_ref( ( GArray * ) array );
 }
 
 /**
@@ -1629,10 +1530,9 @@ g_byte_array_ref (GByteArray *array)
  *
  * Since: 2.22
  **/
-void
-g_byte_array_unref (GByteArray *array)
+void g_byte_array_unref( GByteArray *array )
 {
-  g_array_unref ((GArray *) array);
+	g_array_unref( ( GArray * ) array );
 }
 
 /**
@@ -1645,13 +1545,11 @@ g_byte_array_unref (GByteArray *array)
  * Adds the given bytes to the end of the #GByteArray. The array will
  * grow in size automatically if necessary.
  **/
-GByteArray* g_byte_array_append   (GByteArray   *array,
-				   const unsigned char *data,
-				   unsigned int         len)
+GByteArray *g_byte_array_append( GByteArray *array, const guchar *data, guint len )
 {
-  g_array_append_vals ((GArray*) array, (unsigned char*)data, len);
+	g_array_append_vals( ( GArray * ) array, ( guchar * )data, len );
 
-  return array;
+	return array;
 }
 
 /**
@@ -1664,13 +1562,11 @@ GByteArray* g_byte_array_append   (GByteArray   *array,
  * Adds the given data to the start of the #GByteArray. The array will
  * grow in size automatically if necessary.
  **/
-GByteArray* g_byte_array_prepend  (GByteArray   *array,
-				   const unsigned char *data,
-				   unsigned int         len)
+GByteArray *g_byte_array_prepend( GByteArray *array, const guchar *data, guint len )
 {
-  g_array_prepend_vals ((GArray*) array, (unsigned char*)data, len);
+	g_array_prepend_vals( ( GArray * ) array, ( guchar * )data, len );
 
-  return array;
+	return array;
 }
 
 /**
@@ -1681,12 +1577,11 @@ GByteArray* g_byte_array_prepend  (GByteArray   *array,
  *
  * Sets the size of the #GByteArray, expanding it if necessary.
  **/
-GByteArray* g_byte_array_set_size (GByteArray *array,
-				   unsigned int       length)
+GByteArray *g_byte_array_set_size( GByteArray *array, guint length )
 {
-  g_array_set_size ((GArray*) array, length);
+	g_array_set_size( ( GArray * ) array, length );
 
-  return array;
+	return array;
 }
 
 /**
@@ -1698,12 +1593,11 @@ GByteArray* g_byte_array_set_size (GByteArray *array,
  * Removes the byte at the given index from a #GByteArray. The
  * following bytes are moved down one place.
  **/
-GByteArray* g_byte_array_remove_index (GByteArray *array,
-				       unsigned int       index_)
+GByteArray *g_byte_array_remove_index( GByteArray *array, guint index_ )
 {
-  g_array_remove_index ((GArray*) array, index_);
+	g_array_remove_index( ( GArray * ) array, index_ );
 
-  return array;
+	return array;
 }
 
 /**
@@ -1717,12 +1611,11 @@ GByteArray* g_byte_array_remove_index (GByteArray *array,
  * does not preserve the order of the #GByteArray. But it is faster
  * than g_byte_array_remove_index().
  **/
-GByteArray* g_byte_array_remove_index_fast (GByteArray *array,
-					    unsigned int       index_)
+GByteArray *g_byte_array_remove_index_fast( GByteArray *array, guint index_ )
 {
-  g_array_remove_index_fast ((GArray*) array, index_);
+	g_array_remove_index_fast( ( GArray * ) array, index_ );
 
-  return array;
+	return array;
 }
 
 /**
@@ -1737,16 +1630,13 @@ GByteArray* g_byte_array_remove_index_fast (GByteArray *array,
  *
  * Since: 2.4
  **/
-GByteArray*
-g_byte_array_remove_range (GByteArray *array,
-                           unsigned int       index_,
-                           unsigned int       length)
+GByteArray *g_byte_array_remove_range( GByteArray *array, guint index_, guint length )
 {
-  g_return_val_if_fail (array, NULL);
-  g_return_val_if_fail (index_ < array->len, NULL);
-  g_return_val_if_fail (index_ + length <= array->len, NULL);
+	g_return_val_if_fail( array, NULL );
+	g_return_val_if_fail( index_ < array->len, NULL );
+	g_return_val_if_fail( index_ + length <= array->len, NULL );
 
-  return (GByteArray *)g_array_remove_range ((GArray*) array, index_, length);
+	return ( GByteArray * )g_array_remove_range( ( GArray * ) array, index_, length );
 }
 
 /**
@@ -1765,11 +1655,9 @@ g_byte_array_remove_range (GByteArray *array,
  * if two elements would otherwise compare equal, compares them by
  * their addresses.
  **/
-void
-g_byte_array_sort (GByteArray   *array,
-		   GCompareFunc  compare_func)
+void g_byte_array_sort( GByteArray *array, GCompareFunc compare_func )
 {
-  g_array_sort ((GArray *) array, compare_func);
+	g_array_sort( ( GArray * ) array, compare_func );
 }
 
 /**
@@ -1781,10 +1669,7 @@ g_byte_array_sort (GByteArray   *array,
  * Like g_byte_array_sort(), but the comparison function takes an extra
  * user data argument.
  **/
-void
-g_byte_array_sort_with_data (GByteArray       *array,
-			     GCompareDataFunc  compare_func,
-			     gpointer          user_data)
+void g_byte_array_sort_with_data( GByteArray *array, GCompareDataFunc compare_func, gpointer user_data )
 {
-  g_array_sort_with_data ((GArray *) array, compare_func, user_data);
+	g_array_sort_with_data( ( GArray * ) array, compare_func, user_data );
 }

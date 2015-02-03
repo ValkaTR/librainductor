@@ -103,7 +103,7 @@ struct CONSOLE_CLASS *console_init( int _w, int _h )
 		{
 			switch( background_xpm[j + 5][i] )
 			{
-				case '@': console->buffer_current[i + j * console->w].ch = 0x20 /*   */; break;
+				case '@': console->buffer_current[i + j * console->w].ch = 0xFA /* · */; break;
 				case '+': console->buffer_current[i + j * console->w].ch = 0xB0 /* ░ */; break;
 				case '.': console->buffer_current[i + j * console->w].ch = 0xB1 /* ▒ */; break;
 				case ' ': console->buffer_current[i + j * console->w].ch = 0xB2 /* ▓ */; break;

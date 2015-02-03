@@ -22,11 +22,11 @@
 // functions
 
 struct WINDOW_CLASS *window_create(
-	struct USHELL_CLASS *ushell,
+	struct WINDOW_CLASS *parent,
 	const char *title,
 	struct WINDOW_ATTRIBUTES *attributes,
 	struct WINDOW_RECT *rect,
-	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam ),
+	int (*wnd_proc) ( struct WINDOW_CLASS *windowdow, enum WINDOW_MESSAGE command, int uParam, int vParam ),
 	void *user_def
 )
 {
@@ -34,37 +34,45 @@ struct WINDOW_CLASS *window_create(
 	// Memory allocation and variable copying
 	//
 	
-	struct WINDOW_CLASS *win = (struct WINDOW_CLASS *) malloc( sizeof(struct WINDOW_CLASS) );
+	struct WINDOW_CLASS *window = (struct WINDOW_CLASS *) malloc( sizeof(struct WINDOW_CLASS) );
 	
-	win->title = (char *) title;
+	window->title = (char *) title;
 
-	memcpy( &win->attributes, attributes, sizeof(struct WINDOW_ATTRIBUTES) );
-	memcpy( &win->rect, rect, sizeof(struct WINDOW_RECT) );
+	memcpy( &window->attributes, attributes, sizeof(struct WINDOW_ATTRIBUTES) );
+	memcpy( &window->rect, rect, sizeof(struct WINDOW_RECT) );
 
-	size_t buffer_size = win->rect.w * win->rect.h * sizeof(struct CONSOLE_BUFFER_CELL);
-	win->paint_buffer = (struct CONSOLE_BUFFER_CELL *) malloc( buffer_size );
-	memset( win->paint_buffer, 0, buffer_size );
-	for( int j = 0; j < win->rect.h; j++ )
-	for( int i = 0; i < win->rect.w; i++ )
-		window_write_cell( win, i, j, '0' );
+	size_t buffer_size = window->rect.w * window->rect.h * sizeof(struct CONSOLE_BUFFER_CELL);
+	window->paint_buffer = (struct CONSOLE_BUFFER_CELL *) malloc( buffer_size );
+	memset( window->paint_buffer, 0, buffer_size );
+	for( int j = 0; j < window->rect.h; j++ )
+	for( int i = 0; i < window->rect.w; i++ )
+		window_write_cell( window, i, j, ' ' );
 
-	win->wnd_proc = wnd_proc;
-	
-	win->user_def = user_def;
-	
-	win->ushell = ushell;
-	win->console = ushell->console;
+	window->wnd_proc = wnd_proc;	
+	window->user_def = user_def;
 	
 	//
-	// Make window appear on the console
+	// Make windowdow appear on the console
 	//
+
+	if( parent == NULL )
+	{
+		// Window doesn't have parent
+	}
+	else
+	{
+		window->parent = parent;
+		window->ushell = parent->ushell;
+		window->console = parent->ushell->console;
+		
+		window->widgets = g_ptr_array_new( );
+		g_ptr_array_add( parent->widgets, window );
+	}
 	
-	g_ptr_array_add( ushell->window_list, win );
+	window_send_message( window, WM_CREATE, 0, 0 );
+	window_send_message( window, WM_PAINT, 0, 0 );
 	
-	window_send_message( win, WM_CREATE, 0, 0 );
-	window_send_message( win, WM_PAINT, 0, 0 );
-	
-	return win;
+	return window;
 }
 
 // #############################################################################
@@ -87,23 +95,43 @@ struct WINDOW_CLASS *window_get_active( struct USHELL_CLASS *ushell )
 
 // #############################################################################
 
-void window_write_text( struct WINDOW_CLASS *window, int x, int y, char *str )
+void window_write_text_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *str )
 {
 	for( int i = 0; str[i] != 0; i++ )
 	{
 		struct CONSOLE_BUFFER_CELL *cell = &window->paint_buffer[i + x + y * window->rect.w];
 		cell->ch = str[i];
-		cell->fg_color = window->attributes.fg_color;
-		cell->bg_color = window->attributes.bg_color;
+		cell->bold = bold;
+		cell->underline = underline;
+		cell->fg_color = fg_color;
+		cell->bg_color = bg_color;
 	}
+}
+
+void window_write_text( struct WINDOW_CLASS *window, int x, int y, char *str )
+{
+	window_write_text_full( window, x, y, false, false,
+		window->attributes.fg_color, window->attributes.bg_color,
+		str
+	);
+}
+
+void window_write_cell_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char ch )
+{
+	struct CONSOLE_BUFFER_CELL *cell = &window->paint_buffer[x + y * window->rect.w];
+	cell->ch = ch;
+	cell->bold = bold;
+	cell->underline = underline;
+	cell->fg_color = fg_color;
+	cell->bg_color = bg_color;
 }
 
 void window_write_cell( struct WINDOW_CLASS *window, int x, int y, char ch )
 {
-	struct CONSOLE_BUFFER_CELL *cell = &window->paint_buffer[x + y * window->rect.w];
-	cell->ch = ch;
-	cell->fg_color = window->attributes.fg_color;
-	cell->bg_color = window->attributes.bg_color;
+	window_write_cell_full( window, x, y, false, false,
+		window->attributes.fg_color, window->attributes.bg_color,
+		ch
+	);
 }
 
 // #############################################################################
@@ -140,9 +168,31 @@ int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, i
 			window_write_cell( window, title_offset + title_len, 0, ' ' );
 			window_write_cell( window, title_offset + title_len + 1, 0, ']' );
 			
-			window->paint_buffer[75 + 1 * window->rect.w].ch = '1';
-			window->paint_buffer[75 + 1 * window->rect.w].fg_color = 1;
+			// Draw all widgets
+			for( int i = 0; window->widgets->pdata[i]; i++ )
+			{
+				struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) window->widgets->pdata[i];
+				window_send_message( widget, WM_PAINT, 0, 0 );
+			}
 			
+			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
+			console_swap_buffers( window->console );
+			
+			break;
+		}
+		
+	}
+	
+	return 0;
+}
+
+int widget_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+{
+	switch( command )
+	{
+
+		case WM_PAINT:
+		{
 			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
 			console_swap_buffers( window->console );
 			

@@ -50,42 +50,39 @@
 
 #define MY_MAXSIZE      (65535 - 1)
 
-static inline gssize
-nearest_power (gssize base, gssize num)
+static inline gssize nearest_power( gssize base, gssize num )
 {
-  if (num > MY_MAXSIZE / 2)
-    {
-      return MY_MAXSIZE;
-    }
-  else
-    {
-      gssize n = base;
+	if( num > MY_MAXSIZE / 2 )
+	{
+		return MY_MAXSIZE;
+	}
+	else
+	{
+		gssize n = base;
 
-      while (n < num)
-        n <<= 1;
+		while( n < num )
+			n <<= 1;
 
-      return n;
-    }
+		return n;
+	}
 }
 
-static void
-g_string_maybe_expand (GString *string,
-                       gssize    len)
+static void g_string_maybe_expand( GString *string, gssize len )
 {
 //Serial.println( String("g_string_maybe_expand: len = ") + len ); delay( 250 );
 //Serial.println( String("g_string_maybe_expand: string->allocated_len = ") + string->allocated_len ); delay( 250 );
 //Serial.println( String("g_string_maybe_expand: string->len = ") + string->len ); delay( 250 );
-  if (string->len + len >= string->allocated_len)
-    {
-      string->allocated_len = nearest_power (1, string->len + len + 1);
-//Serial.println( String("g_string_maybe_expand: new string->allocated_len = ") + string->allocated_len ); delay( 250 );      
-      string->str = (gchar *) realloc (string->str, string->allocated_len);
-      
-      //char *temp = (gchar *) malloc (string->allocated_len);
-      //strncpy( temp, string->str, string->len );
-      //free( string->str );
-      //string->str = temp;
-    }
+	if( string->len + len >= string->allocated_len )
+	{
+		string->allocated_len = nearest_power( 1, string->len + len + 1 );
+//Serial.println( String("g_string_maybe_expand: new string->allocated_len = ") + string->allocated_len ); delay( 250 );
+		string->str = ( gchar * ) realloc( string->str, string->allocated_len );
+
+		//char *temp = (gchar *) malloc (string->allocated_len);
+		//strncpy( temp, string->str, string->len );
+		//free( string->str );
+		//string->str = temp;
+	}
 }
 
 /**
@@ -100,19 +97,18 @@ g_string_maybe_expand (GString *string,
  *
  * Returns: the new #GString
  */
-GString *
-g_string_sized_new (gssize dfl_size)
+GString *g_string_sized_new( gssize dfl_size )
 {
-  GString *string = (GString *) malloc (sizeof(GString));
+	GString *string = ( GString * ) malloc( sizeof( GString ) );
 
-  string->allocated_len = 0;
-  string->len   = 0;
-  string->str   = NULL;
+	string->allocated_len = 0;
+	string->len   = 0;
+	string->str   = NULL;
 
-  g_string_maybe_expand (string, MAX (dfl_size, 2));
-  string->str[0] = 0;
+	g_string_maybe_expand( string, MAX( dfl_size, 2 ) );
+	string->str[0] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -123,24 +119,23 @@ g_string_sized_new (gssize dfl_size)
  *
  * Returns: the new #GString
  */
-GString *
-g_string_new (const gchar *init)
+GString *g_string_new( const gchar *init )
 {
-  GString *string;
+	GString *string;
 
-  if (init == NULL || *init == '\0')
-    string = g_string_sized_new (2);
-  else
-    {
-      gint len;
+	if( init == NULL || *init == '\0' )
+		string = g_string_sized_new( 2 );
+	else
+	{
+		gint len;
 
-      len = strlen (init);
-      string = g_string_sized_new (len + 2);
+		len = strlen( init );
+		string = g_string_sized_new( len + 2 );
 
-      g_string_append_len (string, init, len);
-    }
+		g_string_append_len( string, init, len );
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -158,23 +153,21 @@ g_string_new (const gchar *init)
  *
  * Returns: a new #GString
  */
-GString *
-g_string_new_len (const gchar *init,
-                  gssize       len)
+GString *g_string_new_len( const gchar *init, gssize len )
 {
-  GString *string;
+	GString *string;
 
-  if (len < 0)
-    return g_string_new (init);
-  else
-    {
-      string = g_string_sized_new (len);
+	if( len < 0 )
+		return g_string_new( init );
+	else
+	{
+		string = g_string_sized_new( len );
 
-      if (init)
-        g_string_append_len (string, init, len);
+		if( init )
+			g_string_append_len( string, init, len );
 
-      return string;
-    }
+		return string;
+	}
 }
 
 /**
@@ -190,25 +183,23 @@ g_string_new_len (const gchar *init,
  * Returns: the character data of @string
  *          (i.e. %NULL if @free_segment is %true)
  */
-char *
-g_string_free (GString  *string,
-               bool  free_segment)
+char *g_string_free( GString  *string, bool  free_segment )
 {
-  gchar *segment;
+	gchar *segment;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  if (free_segment)
-    {
-      free (string->str);
-      segment = NULL;
-    }
-  else
-    segment = string->str;
+	if( free_segment )
+	{
+		free( string->str );
+		segment = NULL;
+	}
+	else
+		segment = string->str;
 
-  free (string);
+	free( string );
 
-  return segment;
+	return segment;
 }
 
 /**
@@ -222,29 +213,27 @@ g_string_free (GString  *string,
  * Returns: %true if they strings are the same length and contain the
  *     same bytes
  */
-bool
-g_string_equal (const GString *v,
-                const GString *v2)
+bool g_string_equal( const GString *v, const GString *v2 )
 {
-  gchar *p, *q;
-  GString *string1 = (GString *) v;
-  GString *string2 = (GString *) v2;
-  gssize i = string1->len;
+	gchar *p, *q;
+	GString *string1 = ( GString * ) v;
+	GString *string2 = ( GString * ) v2;
+	gssize i = string1->len;
 
-  if (i != string2->len)
-    return false;
+	if( i != string2->len )
+		return false;
 
-  p = string1->str;
-  q = string2->str;
-  while (i)
-    {
-      if (*p != *q)
-        return false;
-      p++;
-      q++;
-      i--;
-    }
-  return true;
+	p = string1->str;
+	q = string2->str;
+	while( i )
+	{
+		if( *p != *q )
+			return false;
+		p++;
+		q++;
+		i--;
+	}
+	return true;
 }
 
 /**
@@ -255,21 +244,20 @@ g_string_equal (const GString *v,
  *
  * Returns: hash code for @str
  */
-guint
-g_string_hash (const GString *str)
+guint g_string_hash( const GString *str )
 {
-  gchar *p = str->str;
-  gssize n = str->len;
-  guint h = 0;
+	gchar *p = str->str;
+	gssize n = str->len;
+	guint h = 0;
 
-  /* 31 bit hash function */
-  while (n--)
-    {
-      h = (h << 5) - h + *p;
-      p++;
-    }
+	/* 31 bit hash function */
+	while( n-- )
+	{
+		h = ( h << 5 ) - h + *p;
+		p++;
+	}
 
-  return h;
+	return h;
 }
 
 /**
@@ -285,24 +273,22 @@ g_string_hash (const GString *str)
  *
  * Returns: @string
  */
-GString *
-g_string_assign (GString     *string,
-                 const gchar *rval)
+GString *g_string_assign( GString *string, const gchar *rval )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (rval != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( rval != NULL, string );
 
-  /* Make sure assigning to itself doesn't corrupt the string. */
-  if (string->str != rval)
-    {
-      /* Assigning from substring should be ok, since
-       * g_string_truncate() does not reallocate.
-       */
-      g_string_truncate (string, 0);
-      g_string_append (string, rval);
-    }
+	/* Make sure assigning to itself doesn't corrupt the string. */
+	if( string->str != rval )
+	{
+		/* Assigning from substring should be ok, since
+		 * g_string_truncate() does not reallocate.
+		 */
+		g_string_truncate( string, 0 );
+		g_string_append( string, rval );
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -314,16 +300,14 @@ g_string_assign (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_truncate (GString *string,
-                   gssize    len)
+GString *g_string_truncate( GString *string, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  string->len = MIN (len, string->len);
-  string->str[string->len] = 0;
+	string->len = MIN( len, string->len );
+	string->str[string->len] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -339,19 +323,17 @@ g_string_truncate (GString *string,
  *
  * Return value: @string
  */
-GString *
-g_string_set_size (GString *string,
-                   gssize    len)
+GString *g_string_set_size( GString *string, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  if (len >= string->allocated_len)
-    g_string_maybe_expand (string, len - string->len);
+	if( len >= string->allocated_len )
+		g_string_maybe_expand( string, len - string->len );
 
-  string->len = len;
-  string->str[len] = 0;
+	string->len = len;
+	string->str[len] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -373,111 +355,104 @@ g_string_set_size (GString *string,
  *
  * Returns: @string
  */
-GString *
-g_string_insert_len (GString     *string,
-                     gssize       pos,
-                     const gchar *val,
-                     gssize       len)
+GString *g_string_insert_len( GString *string, gssize pos, const gchar *val, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (len == 0 || val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( len == 0 || val != NULL, string );
 
-  if (len == 0)
-    return string;
+	if( len == 0 )
+		return string;
 
-  if (len < 0)
-    len = strlen (val);
+	if( len < 0 )
+		len = strlen( val );
 //Serial.println( String("len = ") + (int) len ); delay( 250 );
-  if (pos < 0)
-    pos = string->len;
-  else
-    g_return_val_if_fail (pos <= string->len, string);
+	if( pos < 0 )
+		pos = string->len;
+	else
+		g_return_val_if_fail( pos <= string->len, string );
 //Serial.println( String("pos = ") + (int) pos ); delay( 250 );
-  /* Check whether val represents a substring of string.
-   * This test probably violates chapter and verse of the C standards,
-   * since ">=" and "<=" are only valid when val really is a substring.
-   * In practice, it will work on modern archs.
-   */
-  if (val >= string->str && val <= string->str + string->len)
-    {
+	/* Check whether val represents a substring of string.
+	 * This test probably violates chapter and verse of the C standards,
+	 * since ">=" and "<=" are only valid when val really is a substring.
+	 * In practice, it will work on modern archs.
+	 */
+	if( val >= string->str && val <= string->str + string->len )
+	{
 //Serial.println( String("val represents a substring of string") ); delay( 250 );
-      gssize offset = val - string->str;
-      gssize precount = 0;
+		gssize offset = val - string->str;
+		gssize precount = 0;
 //Serial.println( String("offset = ") + (int) offset ); delay( 250 );
-      g_string_maybe_expand (string, len);
-      val = string->str + offset;
-      /* At this point, val is valid again.  */
+		g_string_maybe_expand( string, len );
+		val = string->str + offset;
+		/* At this point, val is valid again.  */
 //Serial.println( String("new val = ") + val ); delay( 250 );
-      /* Open up space where we are going to insert.  */
-      if (pos < string->len)
-        memmove (string->str + pos + len, string->str + pos, string->len - pos);
+		/* Open up space where we are going to insert.  */
+		if( pos < string->len )
+			memmove( string->str + pos + len, string->str + pos, string->len - pos );
 
-      /* Move the source part before the gap, if any.  */
-      if (offset < pos)
-        {
-          precount = MIN (len, pos - offset);
+		/* Move the source part before the gap, if any.  */
+		if( offset < pos )
+		{
+			precount = MIN( len, pos - offset );
 //Serial.println( String("precount = ") + precount ); delay( 250 );
-          memcpy (string->str + pos, val, precount);
-        }
+			memcpy( string->str + pos, val, precount );
+		}
 
-      /* Move the source part after the gap, if any.  */
-      if (len > precount)
-        memcpy (string->str + pos + precount,
-                val + /* Already moved: */ precount + /* Space opened up: */ len,
-                len - precount);
-    }
-  else
-    {
+		/* Move the source part after the gap, if any.  */
+		if( len > precount )
+			memcpy( string->str + pos + precount,
+			        val + /* Already moved: */ precount + /* Space opened up: */ len,
+			        len - precount );
+	}
+	else
+	{
 //Serial.println( String("val does not represent a substring of string") ); delay( 250 );
-      g_string_maybe_expand (string, len);
+		g_string_maybe_expand( string, len );
 
-      /* If we aren't appending at the end, move a hunk
-       * of the old string to the end, opening up space
-       */
-      if (pos < string->len)
-        memmove (string->str + pos + len, string->str + pos, string->len - pos);
+		/* If we aren't appending at the end, move a hunk
+		 * of the old string to the end, opening up space
+		 */
+		if( pos < string->len )
+			memmove( string->str + pos + len, string->str + pos, string->len - pos );
 
-      /* insert the new string */
-      if (len == 1)
-        string->str[pos] = *val;
-      else
-        memcpy (string->str + pos, val, len);
-    }
+		/* insert the new string */
+		if( len == 1 )
+			string->str[pos] = *val;
+		else
+			memcpy( string->str + pos, val, len );
+	}
 
-  string->len += len;
+	string->len += len;
 //Serial.println( String("string->len = ") + string->len ); delay( 250 );
 
-  string->str[string->len] = 0;
+	string->str[string->len] = 0;
 
-  return string;
+	return string;
 }
 
 #define SUB_DELIM_CHARS  "!$&'()*+,;="
 
-static bool
-is_valid (gchar        c,
-          gchar *reserved_chars_allowed)
+static bool is_valid( gchar c, gchar *reserved_chars_allowed )
 {
-  if (g_ascii_isalnum (c) ||
-      c == '-' ||
-      c == '.' ||
-      c == '_' ||
-      c == '~')
-    return true;
+	if( g_ascii_isalnum( c ) ||
+	        c == '-' ||
+	        c == '.' ||
+	        c == '_' ||
+	        c == '~' )
+		return true;
 
-  if (reserved_chars_allowed &&
-      strchr (reserved_chars_allowed, c) != NULL)
-    return true;
+	if( reserved_chars_allowed &&
+	        strchr( reserved_chars_allowed, c ) != NULL )
+		return true;
 
-  return false;
+	return false;
 }
 
-static bool
-word_ok (word c)
+static bool word_ok( word c )
 {
-  return
-    (c != (word) -2) &&
-    (c != (word) -1);
+	return
+	    ( c != ( word ) - 2 ) &&
+	    ( c != ( word ) - 1 );
 }
 
 /**
@@ -495,45 +470,41 @@ word_ok (word c)
  *
  * Since: 2.16
  */
-GString *
-g_string_append_uri_escaped (GString     *string,
-                             const gchar *unescaped,
-                             const gchar *reserved_chars_allowed,
-                             bool     allow_utf8)
+GString *g_string_append_uri_escaped( GString *string, const gchar *unescaped, const gchar *reserved_chars_allowed, bool     allow_utf8 )
 {
-  guchar c;
-  gchar *end;
-  static gchar hex[32] = "0123456789ABCDEF";
+	guchar c;
+	gchar *end;
+	static gchar hex[32] = "0123456789ABCDEF";
 
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (unescaped != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( unescaped != NULL, NULL );
 
-  end = (gchar *) unescaped + strlen (unescaped);
+	end = ( gchar * ) unescaped + strlen( unescaped );
 
-  while ((c = *unescaped) != 0)
-    {
-      if (c >= 0x80 && allow_utf8 &&
-          word_ok (g_utf8_get_char_validated (unescaped, end - unescaped)))
-        {
-          gint len = g_utf8_skip [c];
-          g_string_append_len (string, unescaped, len);
-          unescaped += len;
-        }
-      else if (is_valid (c, (gchar *) reserved_chars_allowed))
-        {
-          g_string_append_c (string, c);
-          unescaped++;
-        }
-      else
-        {
-          g_string_append_c (string, '%');
-          g_string_append_c (string, hex[((unsigned char)c) >> 4]);
-          g_string_append_c (string, hex[((unsigned char)c) & 0xf]);
-          unescaped++;
-        }
-    }
+	while( ( c = *unescaped ) != 0 )
+	{
+		if( c >= 0x80 && allow_utf8 &&
+		        word_ok( g_utf8_get_char_validated( unescaped, end - unescaped ) ) )
+		{
+			gint len = g_utf8_skip [c];
+			g_string_append_len( string, unescaped, len );
+			unescaped += len;
+		}
+		else if( is_valid( c, ( gchar * ) reserved_chars_allowed ) )
+		{
+			g_string_append_c( string, c );
+			unescaped++;
+		}
+		else
+		{
+			g_string_append_c( string, '%' );
+			g_string_append_c( string, hex[( ( unsigned char )c ) >> 4] );
+			g_string_append_c( string, hex[( ( unsigned char )c ) & 0xf] );
+			unescaped++;
+		}
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -546,16 +517,14 @@ g_string_append_uri_escaped (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_append (GString     *string,
-                 const gchar *val)
+GString *g_string_append( GString *string, const gchar *val )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( val != NULL, string );
 //Serial.print( String("val = ") );
 //Serial.println( val );
 //Serial.print( String(";\r\n") );
-  return g_string_insert_len (string, -1, val, -1);
+	return g_string_insert_len( string, -1, val, -1 );
 }
 
 /**
@@ -574,15 +543,12 @@ g_string_append (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_append_len (GString     *string,
-                     const gchar *val,
-                     gssize       len)
+GString *g_string_append_len( GString *string, const gchar *val, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (len == 0 || val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( len == 0 || val != NULL, string );
 
-  return g_string_insert_len (string, -1, val, len);
+	return g_string_insert_len( string, -1, val, len );
 }
 
 /**
@@ -596,13 +562,11 @@ g_string_append_len (GString     *string,
  * Returns: @string
  */
 #undef g_string_append_c
-GString *
-g_string_append_c (GString *string,
-                   gchar    c)
+GString *g_string_append_c( GString *string, gchar c )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  return g_string_insert_c (string, -1, c);
+	return g_string_insert_c( string, -1, c );
 }
 
 /**
@@ -615,13 +579,11 @@ g_string_append_c (GString *string,
  *
  * Return value: @string
  */
-GString *
-g_string_append_unichar (GString  *string,
-                         word  wc)
+GString *g_string_append_unichar( GString *string, word wc )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  return g_string_insert_unichar (string, -1, wc);
+	return g_string_insert_unichar( string, -1, wc );
 }
 
 /**
@@ -634,14 +596,12 @@ g_string_append_unichar (GString  *string,
  *
  * Returns: @string
  */
-GString *
-g_string_prepend (GString     *string,
-                  const gchar *val)
+GString *g_string_prepend( GString *string, const gchar *val )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( val != NULL, string );
 
-  return g_string_insert_len (string, 0, val, -1);
+	return g_string_insert_len( string, 0, val, -1 );
 }
 
 /**
@@ -660,15 +620,12 @@ g_string_prepend (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_prepend_len (GString     *string,
-                      const gchar *val,
-                      gssize       len)
+GString *g_string_prepend_len( GString *string, const gchar *val, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( val != NULL, string );
 
-  return g_string_insert_len (string, 0, val, len);
+	return g_string_insert_len( string, 0, val, len );
 }
 
 /**
@@ -681,13 +638,11 @@ g_string_prepend_len (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_prepend_c (GString *string,
-                    gchar    c)
+GString *g_string_prepend_c( GString *string, gchar c )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  return g_string_insert_c (string, 0, c);
+	return g_string_insert_c( string, 0, c );
 }
 
 /**
@@ -700,13 +655,11 @@ g_string_prepend_c (GString *string,
  *
  * Return value: @string
  */
-GString *
-g_string_prepend_unichar (GString  *string,
-                          word  wc)
+GString *g_string_prepend_unichar( GString  *string, word  wc )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  return g_string_insert_unichar (string, 0, wc);
+	return g_string_insert_unichar( string, 0, wc );
 }
 
 /**
@@ -720,18 +673,15 @@ g_string_prepend_unichar (GString  *string,
  *
  * Returns: @string
  */
-GString *
-g_string_insert (GString     *string,
-                 gssize       pos,
-                 const gchar *val)
+GString *g_string_insert( GString *string, gssize pos, const gchar *val )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (val != NULL, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( val != NULL, string );
 
-  if (pos >= 0)
-    g_return_val_if_fail (pos <= string->len, string);
+	if( pos >= 0 )
+		g_return_val_if_fail( pos <= string->len, string );
 
-  return g_string_insert_len (string, pos, val, -1);
+	return g_string_insert_len( string, pos, val, -1 );
 }
 
 /**
@@ -744,31 +694,28 @@ g_string_insert (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_insert_c (GString *string,
-                   gssize   pos,
-                   gchar    c)
+GString *g_string_insert_c( GString *string, gssize pos, gchar c )
 {
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  g_string_maybe_expand (string, 1);
+	g_string_maybe_expand( string, 1 );
 
-  if (pos < 0)
-    pos = string->len;
-  else
-    g_return_val_if_fail (pos <= string->len, string);
+	if( pos < 0 )
+		pos = string->len;
+	else
+		g_return_val_if_fail( pos <= string->len, string );
 
-  /* If not just an append, move the old stuff */
-  if (pos < string->len)
-    memmove (string->str + pos + 1, string->str + pos, string->len - pos);
+	/* If not just an append, move the old stuff */
+	if( pos < string->len )
+		memmove( string->str + pos + 1, string->str + pos, string->len - pos );
 
-  string->str[pos] = c;
+	string->str[pos] = c;
 
-  string->len += 1;
+	string->len += 1;
 
-  string->str[string->len] = 0;
+	string->str[string->len] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -783,75 +730,72 @@ g_string_insert_c (GString *string,
  *
  * Return value: @string
  */
-GString *
-g_string_insert_unichar (GString  *string,
-                         gssize    pos,
-                         word  wc)
+GString *g_string_insert_unichar( GString *string, gssize pos, word  wc )
 {
-  gint charlen, first, i;
-  gchar *dest;
+	gint charlen, first, i;
+	gchar *dest;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  /* Code copied from g_unichar_to_utf() */
-  if (wc < 0x80)
-    {
-      first = 0;
-      charlen = 1;
-    }
-  else if (wc < 0x800)
-    {
-      first = 0xc0;
-      charlen = 2;
-    }
-  else if (wc < 0x10000)
-    {
-      first = 0xe0;
-      charlen = 3;
-    }
-   else if (wc < 0x200000)
-    {
-      first = 0xf0;
-      charlen = 4;
-    }
-  else if (wc < 0x4000000)
-    {
-      first = 0xf8;
-      charlen = 5;
-    }
-  else
-    {
-      first = 0xfc;
-      charlen = 6;
-    }
-  /* End of copied code */
+	/* Code copied from g_unichar_to_utf() */
+	if( wc < 0x80 )
+	{
+		first = 0;
+		charlen = 1;
+	}
+	else if( wc < 0x800 )
+	{
+		first = 0xc0;
+		charlen = 2;
+	}
+	else if( wc < 0x10000 )
+	{
+		first = 0xe0;
+		charlen = 3;
+	}
+	else if( wc < 0x200000 )
+	{
+		first = 0xf0;
+		charlen = 4;
+	}
+	else if( wc < 0x4000000 )
+	{
+		first = 0xf8;
+		charlen = 5;
+	}
+	else
+	{
+		first = 0xfc;
+		charlen = 6;
+	}
+	/* End of copied code */
 
-  g_string_maybe_expand (string, charlen);
+	g_string_maybe_expand( string, charlen );
 
-  if (pos < 0)
-    pos = string->len;
-  else
-    g_return_val_if_fail (pos <= string->len, string);
+	if( pos < 0 )
+		pos = string->len;
+	else
+		g_return_val_if_fail( pos <= string->len, string );
 
-  /* If not just an append, move the old stuff */
-  if (pos < string->len)
-    memmove (string->str + pos + charlen, string->str + pos, string->len - pos);
+	/* If not just an append, move the old stuff */
+	if( pos < string->len )
+		memmove( string->str + pos + charlen, string->str + pos, string->len - pos );
 
-  dest = string->str + pos;
-  /* Code copied from g_unichar_to_utf() */
-  for (i = charlen - 1; i > 0; --i)
-    {
-      dest[i] = (wc & 0x3f) | 0x80;
-      wc >>= 6;
-    }
-  dest[0] = wc | first;
-  /* End of copied code */
+	dest = string->str + pos;
+	/* Code copied from g_unichar_to_utf() */
+	for( i = charlen - 1; i > 0; --i )
+	{
+		dest[i] = ( wc & 0x3f ) | 0x80;
+		wc >>= 6;
+	}
+	dest[0] = wc | first;
+	/* End of copied code */
 
-  string->len += charlen;
+	string->len += charlen;
 
-  string->str[string->len] = 0;
+	string->str[string->len] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -866,13 +810,10 @@ g_string_insert_unichar (GString  *string,
  *
  * Since: 2.14
  */
-GString *
-g_string_overwrite (GString     *string,
-                    gssize        pos,
-                    gchar *val)
+GString *g_string_overwrite( GString *string, gssize pos, gchar *val )
 {
-  g_return_val_if_fail (val != NULL, string);
-  return g_string_overwrite_len (string, pos, val, strlen (val));
+	g_return_val_if_fail( val != NULL, string );
+	return g_string_overwrite_len( string, pos, val, strlen( val ) );
 }
 
 /**
@@ -889,39 +830,35 @@ g_string_overwrite (GString     *string,
  *
  * Since: 2.14
  */
-GString *
-g_string_overwrite_len (GString     *string,
-                        gssize        pos,
-                        const gchar *val,
-                        gssize       len)
+GString *g_string_overwrite_len( GString *string, gssize pos, const gchar *val, gssize len )
 {
-  gssize end;
+	gssize end;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  if (!len)
-    return string;
+	if( !len )
+		return string;
 
-  g_return_val_if_fail (val != NULL, string);
-  g_return_val_if_fail (pos <= string->len, string);
+	g_return_val_if_fail( val != NULL, string );
+	g_return_val_if_fail( pos <= string->len, string );
 
-  if (len < 0)
-    len = strlen (val);
+	if( len < 0 )
+		len = strlen( val );
 
-  end = pos + len;
+	end = pos + len;
 
-  if (end > string->len)
-    g_string_maybe_expand (string, end - string->len);
+	if( end > string->len )
+		g_string_maybe_expand( string, end - string->len );
 
-  memcpy (string->str + pos, val, len);
+	memcpy( string->str + pos, val, len );
 
-  if (end > string->len)
-    {
-      string->str[end] = '\0';
-      string->len = end;
-    }
+	if( end > string->len )
+	{
+		string->str[end] = '\0';
+		string->len = end;
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -936,30 +873,27 @@ g_string_overwrite_len (GString     *string,
  *
  * Returns: @string
  */
-GString *
-g_string_erase (GString *string,
-                gssize   pos,
-                gssize   len)
+GString *g_string_erase( GString *string, gssize pos, gssize len )
 {
-  g_return_val_if_fail (string != NULL, NULL);
-  g_return_val_if_fail (pos >= 0, string);
-  g_return_val_if_fail (pos <= string->len, string);
+	g_return_val_if_fail( string != NULL, NULL );
+	g_return_val_if_fail( pos >= 0, string );
+	g_return_val_if_fail( pos <= string->len, string );
 
-  if (len < 0)
-    len = string->len - pos;
-  else
-    {
-      g_return_val_if_fail (pos + len <= string->len, string);
+	if( len < 0 )
+		len = string->len - pos;
+	else
+	{
+		g_return_val_if_fail( pos + len <= string->len, string );
 
-      if (pos + len < string->len)
-        memmove (string->str + pos, string->str + pos + len, string->len - (pos + len));
-    }
+		if( pos + len < string->len )
+			memmove( string->str + pos, string->str + pos + len, string->len - ( pos + len ) );
+	}
 
-  string->len -= len;
+	string->len -= len;
 
-  string->str[string->len] = 0;
+	string->str[string->len] = 0;
 
-  return string;
+	return string;
 }
 
 /**
@@ -972,25 +906,24 @@ g_string_erase (GString *string,
  *     uppercase characters converted to lowercase in place,
  *     with semantics that exactly match g_ascii_tolower().
  */
-GString *
-g_string_ascii_down (GString *string)
+GString *g_string_ascii_down( GString *string )
 {
-  gchar *s;
-  gint n;
+	gchar *s;
+	gint n;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  n = string->len;
-  s = string->str;
+	n = string->len;
+	s = string->str;
 
-  while (n)
-    {
-      *s = g_ascii_tolower (*s);
-      s++;
-      n--;
-    }
+	while( n )
+	{
+		*s = g_ascii_tolower( *s );
+		s++;
+		n--;
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -1003,25 +936,24 @@ g_string_ascii_down (GString *string)
  *     lowercase characters converted to uppercase in place,
  *     with semantics that exactly match g_ascii_toupper().
  */
-GString *
-g_string_ascii_up (GString *string)
+GString *g_string_ascii_up( GString *string )
 {
-  gchar *s;
-  gint n;
+	gchar *s;
+	gint n;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  n = string->len;
-  s = string->str;
+	n = string->len;
+	s = string->str;
 
-  while (n)
-    {
-      *s = g_ascii_toupper (*s);
-      s++;
-      n--;
-    }
+	while( n )
+	{
+		*s = g_ascii_toupper( *s );
+		s++;
+		n--;
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -1036,26 +968,25 @@ g_string_ascii_up (GString *string)
  *     tolower() function, which is almost never the right thing.
  *     Use g_string_ascii_down() or g_utf8_strdown() instead.
  */
-GString *
-g_string_down (GString *string)
+GString *g_string_down( GString *string )
 {
-  guchar *s;
-  gint n;
+	guchar *s;
+	gint n;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  n = string->len;
-  s = (guchar *) string->str;
+	n = string->len;
+	s = ( guchar * ) string->str;
 
-  while (n)
-    {
-      if (isupper (*s))
-        *s = tolower (*s);
-      s++;
-      n--;
-    }
+	while( n )
+	{
+		if( isupper( *s ) )
+			*s = tolower( *s );
+		s++;
+		n--;
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -1070,26 +1001,25 @@ g_string_down (GString *string)
  *     toupper() function, which is almost never the right thing.
  *     Use g_string_ascii_up() or g_utf8_strup() instead.
  */
-GString *
-g_string_up (GString *string)
+GString *g_string_up( GString *string )
 {
-  guchar *s;
-  gint n;
+	guchar *s;
+	gint n;
 
-  g_return_val_if_fail (string != NULL, NULL);
+	g_return_val_if_fail( string != NULL, NULL );
 
-  n = string->len;
-  s = (guchar *) string->str;
+	n = string->len;
+	s = ( guchar * ) string->str;
 
-  while (n)
-    {
-      if (islower (*s))
-        *s = toupper (*s);
-      s++;
-      n--;
-    }
+	while( n )
+	{
+		if( islower( *s ) )
+			*s = toupper( *s );
+		s++;
+		n--;
+	}
 
-  return string;
+	return string;
 }
 
 /**
@@ -1105,26 +1035,23 @@ g_string_up (GString *string)
  *
  * Since: 2.14
  */
-void
-g_string_append_vprintf (GString     *string,
-                         const gchar *format,
-                         va_list      args)
+void g_string_append_vprintf( GString *string, const gchar *format, va_list args )
 {
-  gchar *buf;
-  gint len;
+	gchar *buf;
+	gint len;
 
-  g_return_if_fail (string != NULL);
-  g_return_if_fail (format != NULL);
+	g_return_if_fail( string != NULL );
+	g_return_if_fail( format != NULL );
 
-  len = g_vasprintf (&buf, format, args);
+	len = g_vasprintf( &buf, format, args );
 
-  if (len >= 0)
-    {
-      g_string_maybe_expand (string, len);
-      memcpy (string->str + string->len, buf, len + 1);
-      string->len += len;
-      free (buf);
-    }
+	if( len >= 0 )
+	{
+		g_string_maybe_expand( string, len );
+		memcpy( string->str + string->len, buf, len + 1 );
+		string->len += len;
+		free( buf );
+	}
 }
 
 /**
@@ -1139,13 +1066,10 @@ g_string_append_vprintf (GString     *string,
  *
  * Since: 2.14
  */
-void
-g_string_vprintf (GString     *string,
-                  const gchar *format,
-                  va_list      args)
+void g_string_vprintf( GString *string, const gchar *format, va_list args )
 {
-  g_string_truncate (string, 0);
-  g_string_append_vprintf (string, format, args);
+	g_string_truncate( string, 0 );
+	g_string_append_vprintf( string, format, args );
 }
 
 /**
@@ -1175,18 +1099,15 @@ g_string_vprintf (GString     *string,
  * to contain the results. The previous contents of the
  * #GString are destroyed.
  */
-void
-g_string_printf (GString     *string,
-                 const gchar *format,
-                 ...)
+void g_string_printf( GString *string, const gchar *format, ... )
 {
-  va_list args;
+	va_list args;
 
-  g_string_truncate (string, 0);
+	g_string_truncate( string, 0 );
 
-  va_start (args, format);
-  g_string_append_vprintf (string, format, args);
-  va_end (args);
+	va_start( args, format );
+	g_string_append_vprintf( string, format, args );
+	va_end( args );
 }
 
 /**
@@ -1212,16 +1133,13 @@ g_string_printf (GString     *string,
  * This function is similar to g_string_printf() except
  * that the text is appended to the #GString.
  */
-void
-g_string_append_printf (GString     *string,
-                        const gchar *format,
-                        ...)
+void g_string_append_printf( GString *string, const gchar *format, ... )
 {
-  va_list args;
+	va_list args;
 
-  va_start (args, format);
-  g_string_append_vprintf (string, format, args);
-  va_end (args);
+	va_start( args, format );
+	g_string_append_vprintf( string, format, args );
+	va_end( args );
 }
 
 // #####################################################################
@@ -1231,33 +1149,33 @@ g_string_append_printf (GString     *string,
  * @p: a pointer to Unicode character encoded as UTF-8
  * @max_len: the maximum number of bytes to read, or -1, for no maximum or
  *           if @p is nul-terminated
- * 
+ *
  * Convert a sequence of bytes encoded as UTF-8 to a Unicode character.
  * This function checks for incomplete characters, for invalid characters
  * such as characters that are out of the range of Unicode, and for
  * overlong encodings of valid characters.
- * 
+ *
  * Return value: the resulting character. If @p points to a partial
- *    sequence at the end of a string that could begin a valid 
- *    character (or if @max_len is zero), returns (word)-2; 
- *    otherwise, if @p does not point to a valid UTF-8 encoded 
+ *    sequence at the end of a string that could begin a valid
+ *    character (or if @max_len is zero), returns (word)-2;
+ *    otherwise, if @p does not point to a valid UTF-8 encoded
  *    Unicode character, returns (word)-1.
  **/
-word g_utf8_get_char_validated ( const gchar *p, gssize max_len)
+word g_utf8_get_char_validated( const gchar *p, gssize max_len )
 {
-  word result;
+	word result;
 
-  if (max_len == 0)
-    return (word)-2;
+	if( max_len == 0 )
+		return ( word ) - 2;
 
-  result = g_utf8_get_char_extended (p, max_len);
+	result = g_utf8_get_char_extended( p, max_len );
 
-  if (result & 0x80000000)
-    return result;
-  else if (!UNICODE_VALID (result))
-    return (word)-1;
-  else
-    return result;
+	if( result & 0x80000000 )
+		return result;
+	else if( !UNICODE_VALID( result ) )
+		return ( word ) - 1;
+	else
+		return result;
 }
 
 /**
@@ -1273,14 +1191,14 @@ word g_utf8_get_char_validated ( const gchar *p, gssize max_len)
  * library function, this takes and returns a char, not an int, so
  * don't call it on <literal>EOF</literal> but no need to worry about casting to #guchar
  * before passing a possibly non-ASCII character in.
- * 
+ *
  * Return value: the result of converting @c to lower case.
  *               If @c is not an ASCII upper case letter,
  *               @c is returned unchanged.
  **/
-char g_ascii_tolower (gchar c)
+char g_ascii_tolower( gchar c )
 {
-  return g_ascii_isupper (c) ? c - 'A' + 'a' : c;
+	return g_ascii_isupper( c ) ? c - 'A' + 'a' : c;
 }
 
 /**
@@ -1301,9 +1219,9 @@ char g_ascii_tolower (gchar c)
  *               If @c is not an ASCII lower case letter,
  *               @c is returned unchanged.
  **/
-char g_ascii_toupper (gchar c)
+char g_ascii_toupper( gchar c )
 {
-  return g_ascii_islower (c) ? c - 'a' + 'A' : c;
+	return g_ascii_islower( c ) ? c - 'a' + 'A' : c;
 }
 
 /**
@@ -1313,51 +1231,46 @@ char g_ascii_toupper (gchar c)
  *          <link linkend="string-precision">string precision pitfalls</link>.
  * @args: the list of arguments to insert in the output.
  *
- * An implementation of the GNU vasprintf() function which supports 
+ * An implementation of the GNU vasprintf() function which supports
  * positional parameters, as specified in the Single Unix Specification.
- * This function is similar to g_vsprintf(), except that it allocates a 
- * string to hold the output, instead of putting the output in a buffer 
+ * This function is similar to g_vsprintf(), except that it allocates a
+ * string to hold the output, instead of putting the output in a buffer
  * you allocate in advance.
  *
  * Returns: the number of bytes printed.
  *
  * Since: 2.4
  **/
-gint 
-g_vasprintf (gchar      **string,
-	     const gchar *format,
-	     va_list      args)
+gint g_vasprintf( gchar **string, const gchar *format, va_list args )
 {
-  gint len;
-  g_return_val_if_fail (string != NULL, -1);
+	gint len;
+	g_return_val_if_fail( string != NULL, -1 );
 
-    va_list args2;
+	va_list args2;
 
-    //G_VA_COPY (args2, args);
-    args2 = args;
+	//G_VA_COPY (args2, args);
+	args2 = args;
 
-    *string = (gchar *) malloc ( sizeof(gchar) * g_printf_string_upper_bound (format, args));
+	*string = ( gchar * ) malloc( sizeof( gchar ) * g_printf_string_upper_bound( format, args ) );
 
-    len = vsprintf (*string, format, args2);
-    va_end (args2);
+	len = vsprintf( *string, format, args2 );
+	va_end( args2 );
 
-  return len;
+	return len;
 }
 
 /**
  * g_printf_string_upper_bound:
  * @format: the format string. See the printf() documentation
  * @args: the parameters to be inserted into the format string
- * 
+ *
  * Calculates the maximum space needed to store the output
  * of the sprintf() function.
- * 
+ *
  * Returns: the maximum space needed to store the formatted string
  */
-gssize
-g_printf_string_upper_bound (const gchar *format,
-                             va_list      args)
+gssize g_printf_string_upper_bound( const gchar *format, va_list args )
 {
-  gchar c;
-  return vsnprintf (&c, 1, format, args) + 1;
+	gchar c;
+	return vsnprintf( &c, 1, format, args ) + 1;
 }

@@ -38,21 +38,19 @@
  * Returns: a pointer to the newly-allocated copy of the memory, or %NULL if @mem
  *  is %NULL.
  */
-gpointer
-g_memdup (gconstpointer mem,
-          guint         byte_size)
+gpointer g_memdup( gconstpointer mem, guint byte_size )
 {
-  gpointer new_mem;
+	gpointer new_mem;
 
-  if (mem)
-    {
-      new_mem = g_malloc (byte_size);
-      memcpy (new_mem, mem, byte_size);
-    }
-  else
-    new_mem = NULL;
+	if( mem )
+	{
+		new_mem = g_malloc( byte_size );
+		memcpy( new_mem, mem, byte_size );
+	}
+	else
+		new_mem = NULL;
 
-  return new_mem;
+	return new_mem;
 }
 
 // #####################################################################
@@ -90,11 +88,11 @@ g_memdup (gconstpointer mem,
 
 struct _GBytes
 {
-  gconstpointer data;
-  gsize size;
-  gint ref_count;
-  GDestroyNotify free_func;
-  gpointer user_data;
+	gconstpointer data;
+	gsize size;
+	gint ref_count;
+	GDestroyNotify free_func;
+	gpointer user_data;
 };
 
 /**
@@ -110,11 +108,9 @@ struct _GBytes
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_new (gconstpointer data,
-             gsize         size)
+GBytes *g_bytes_new( gconstpointer data, gsize size )
 {
-  return g_bytes_new_take (g_memdup (data, size), size);
+	return g_bytes_new_take( g_memdup( data, size ), size );
 }
 
 /**
@@ -137,11 +133,9 @@ g_bytes_new (gconstpointer data,
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_new_take (gpointer data,
-                  gsize    size)
+GBytes *g_bytes_new_take( gpointer data, gsize size )
 {
-  return g_bytes_new_with_free_func (data, size, g_free, data);
+	return g_bytes_new_with_free_func( data, size, g_free, data );
 }
 
 
@@ -158,11 +152,9 @@ g_bytes_new_take (gpointer data,
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_new_static (gconstpointer data,
-                    gsize         size)
+GBytes *g_bytes_new_static( gconstpointer data, gsize size )
 {
-  return g_bytes_new_with_free_func (data, size, NULL, NULL);
+	return g_bytes_new_with_free_func( data, size, NULL, NULL );
 }
 
 /**
@@ -184,22 +176,18 @@ g_bytes_new_static (gconstpointer data,
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_new_with_free_func (gconstpointer  data,
-                            gsize          size,
-                            GDestroyNotify free_func,
-                            gpointer       user_data)
+GBytes *g_bytes_new_with_free_func( gconstpointer data, gsize size, GDestroyNotify free_func, gpointer user_data )
 {
-  GBytes *bytes;
+	GBytes *bytes;
 
-  bytes = /*g_slice_new*/ (GBytes *) malloc (sizeof(struct _GBytes));
-  bytes->data = data;
-  bytes->size = size;
-  bytes->free_func = free_func;
-  bytes->user_data = user_data;
-  bytes->ref_count = 1;
+	bytes = /*g_slice_new*/ ( GBytes * ) malloc( sizeof( struct _GBytes ) );
+	bytes->data = data;
+	bytes->size = size;
+	bytes->free_func = free_func;
+	bytes->user_data = user_data;
+	bytes->ref_count = 1;
 
-  return (GBytes *)bytes;
+	return ( GBytes * )bytes;
 }
 
 /**
@@ -218,17 +206,14 @@ g_bytes_new_with_free_func (gconstpointer  data,
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_new_from_bytes (GBytes  *bytes,
-                        gsize    offset,
-                        gsize    length)
+GBytes *g_bytes_new_from_bytes( GBytes *bytes, gsize offset, gsize length )
 {
-  g_return_val_if_fail (bytes != NULL, NULL);
-  g_return_val_if_fail (offset <= bytes->size, NULL);
-  g_return_val_if_fail (offset + length <= bytes->size, NULL);
+	g_return_val_if_fail( bytes != NULL, NULL );
+	g_return_val_if_fail( offset <= bytes->size, NULL );
+	g_return_val_if_fail( offset + length <= bytes->size, NULL );
 
-  return g_bytes_new_with_free_func ((gchar *)bytes->data + offset, length,
-                                     (GDestroyNotify)g_bytes_unref, g_bytes_ref (bytes));
+	return g_bytes_new_with_free_func( ( gchar * )bytes->data + offset, length,
+	                                   ( GDestroyNotify )g_bytes_unref, g_bytes_ref( bytes ) );
 }
 
 /**
@@ -244,14 +229,12 @@ g_bytes_new_from_bytes (GBytes  *bytes,
  *
  * Since: 2.32
  */
-gconstpointer
-g_bytes_get_data (GBytes *bytes,
-                  gsize *size)
+gconstpointer g_bytes_get_data( GBytes *bytes, gsize *size )
 {
-  g_return_val_if_fail (bytes != NULL, NULL);
-  if (size)
-    *size = bytes->size;
-  return bytes->data;
+	g_return_val_if_fail( bytes != NULL, NULL );
+	if( size )
+		*size = bytes->size;
+	return bytes->data;
 }
 
 /**
@@ -266,11 +249,10 @@ g_bytes_get_data (GBytes *bytes,
  *
  * Since: 2.32
  */
-gsize
-g_bytes_get_size (GBytes *bytes)
+gsize g_bytes_get_size( GBytes *bytes )
 {
-  g_return_val_if_fail (bytes != NULL, 0);
-  return bytes->size;
+	g_return_val_if_fail( bytes != NULL, 0 );
+	return bytes->size;
 }
 
 
@@ -284,14 +266,13 @@ g_bytes_get_size (GBytes *bytes)
  *
  * Since: 2.32
  */
-GBytes *
-g_bytes_ref (GBytes *bytes)
+GBytes *g_bytes_ref( GBytes *bytes )
 {
-  g_return_val_if_fail (bytes != NULL, NULL);
+	g_return_val_if_fail( bytes != NULL, NULL );
 
-  g_atomic_int_inc (&bytes->ref_count);
+	g_atomic_int_inc( &bytes->ref_count );
 
-  return bytes;
+	return bytes;
 }
 
 /**
@@ -303,19 +284,18 @@ g_bytes_ref (GBytes *bytes)
  *
  * Since: 2.32
  */
-void
-g_bytes_unref (GBytes *bytes)
+void g_bytes_unref( GBytes *bytes )
 {
-  if (bytes == NULL)
-    return;
+	if( bytes == NULL )
+		return;
 
-  if (g_atomic_int_dec_and_test (&bytes->ref_count))
-    {
-      if (bytes->free_func != NULL)
-        bytes->free_func (bytes->user_data);
-      //g_slice_free (GBytes, bytes);
-      free(bytes);
-    }
+	if( g_atomic_int_dec_and_test( &bytes->ref_count ) )
+	{
+		if( bytes->free_func != NULL )
+			bytes->free_func( bytes->user_data );
+		//g_slice_free (GBytes, bytes);
+		free( bytes );
+	}
 }
 
 /**
@@ -333,18 +313,16 @@ g_bytes_unref (GBytes *bytes)
  *
  * Since: 2.32
  */
-gboolean
-g_bytes_equal (gconstpointer bytes1,
-               gconstpointer bytes2)
+gboolean g_bytes_equal( gconstpointer bytes1, gconstpointer bytes2 )
 {
-  const GBytes *b1 = (struct _GBytes *) bytes1;
-  const GBytes *b2 = (struct _GBytes *) bytes2;
+	const GBytes *b1 = ( struct _GBytes * ) bytes1;
+	const GBytes *b2 = ( struct _GBytes * ) bytes2;
 
-  g_return_val_if_fail (bytes1 != NULL, FALSE);
-  g_return_val_if_fail (bytes2 != NULL, FALSE);
+	g_return_val_if_fail( bytes1 != NULL, FALSE );
+	g_return_val_if_fail( bytes2 != NULL, FALSE );
 
-  return b1->size == b2->size &&
-         memcmp (b1->data, b2->data, b1->size) == 0;
+	return b1->size == b2->size &&
+	       memcmp( b1->data, b2->data, b1->size ) == 0;
 }
 
 /**
@@ -360,19 +338,18 @@ g_bytes_equal (gconstpointer bytes1,
  *
  * Since: 2.32
  */
-guint
-g_bytes_hash (gconstpointer bytes)
+guint g_bytes_hash( gconstpointer bytes )
 {
-  const GBytes *a = (struct _GBytes *) bytes;
-  const signed char *p, *e;
-  guint32 h = 5381;
+	const GBytes *a = ( struct _GBytes * ) bytes;
+	const signed char *p, *e;
+	guint32 h = 5381;
 
-  g_return_val_if_fail (bytes != NULL, 0);
+	g_return_val_if_fail( bytes != NULL, 0 );
 
-  for (p = (signed char *)a->data, e = (signed char *)a->data + a->size; p != e; p++)
-    h = (h << 5) + h + *p;
+	for( p = ( signed char * )a->data, e = ( signed char * )a->data + a->size; p != e; p++ )
+		h = ( h << 5 ) + h + *p;
 
-  return h;
+	return h;
 }
 
 /**
@@ -389,44 +366,39 @@ g_bytes_hash (gconstpointer bytes)
  *
  * Since: 2.32
  */
-gint
-g_bytes_compare (gconstpointer bytes1,
-                 gconstpointer bytes2)
+gint g_bytes_compare( gconstpointer bytes1, gconstpointer bytes2 )
 {
-  const GBytes *b1 = (struct _GBytes *) bytes1;
-  const GBytes *b2 = (struct _GBytes *) bytes2;
-  gint ret;
+	const GBytes *b1 = ( struct _GBytes * ) bytes1;
+	const GBytes *b2 = ( struct _GBytes * ) bytes2;
+	gint ret;
 
-  g_return_val_if_fail (bytes1 != NULL, 0);
-  g_return_val_if_fail (bytes2 != NULL, 0);
+	g_return_val_if_fail( bytes1 != NULL, 0 );
+	g_return_val_if_fail( bytes2 != NULL, 0 );
 
-  ret = memcmp (b1->data, b2->data, MIN (b1->size, b2->size));
-  if (ret == 0 && b1->size != b2->size)
-      ret = b1->size < b2->size ? -1 : 1;
-  return ret;
+	ret = memcmp( b1->data, b2->data, MIN( b1->size, b2->size ) );
+	if( ret == 0 && b1->size != b2->size )
+		ret = b1->size < b2->size ? -1 : 1;
+	return ret;
 }
 
-static gpointer
-try_steal_and_unref (GBytes         *bytes,
-                     GDestroyNotify  free_func,
-                     gsize          *size)
+static gpointer try_steal_and_unref( GBytes *bytes, GDestroyNotify free_func, gsize *size )
 {
-  gpointer result;
+	gpointer result;
 
-  if (bytes->free_func != free_func)
-    return NULL;
+	if( bytes->free_func != free_func )
+		return NULL;
 
-  /* Are we the only reference? */
-  if (g_atomic_int_get (&bytes->ref_count) == 1)
-    {
-      *size = bytes->size;
-      result = (gpointer)bytes->data;
-      //g_slice_free (GBytes, bytes);
-      free (bytes);
-      return result;
-    }
+	/* Are we the only reference? */
+	if( g_atomic_int_get( &bytes->ref_count ) == 1 )
+	{
+		*size = bytes->size;
+		result = ( gpointer )bytes->data;
+		//g_slice_free (GBytes, bytes);
+		free( bytes );
+		return result;
+	}
 
-  return NULL;
+	return NULL;
 }
 
 
@@ -448,33 +420,31 @@ try_steal_and_unref (GBytes         *bytes,
  *
  * Since: 2.32
  */
-gpointer
-g_bytes_unref_to_data (GBytes *bytes,
-                       gsize  *size)
+gpointer g_bytes_unref_to_data( GBytes *bytes, gsize  *size )
 {
-  gpointer result;
+	gpointer result;
 
-  g_return_val_if_fail (bytes != NULL, NULL);
-  g_return_val_if_fail (size != NULL, NULL);
+	g_return_val_if_fail( bytes != NULL, NULL );
+	g_return_val_if_fail( size != NULL, NULL );
 
-  /*
-   * Optimal path: if this is was the last reference, then we can return
-   * the data from this GBytes without copying.
-   */
+	/*
+	 * Optimal path: if this is was the last reference, then we can return
+	 * the data from this GBytes without copying.
+	 */
 
-  result = try_steal_and_unref (bytes, g_free, size);
-  if (result == NULL)
-    {
-      /*
-       * Copy: Non g_malloc (or compatible) allocator, or static memory,
-       * so we have to copy, and then unref.
-       */
-      result = g_memdup (bytes->data, bytes->size);
-      *size = bytes->size;
-      g_bytes_unref (bytes);
-    }
+	result = try_steal_and_unref( bytes, g_free, size );
+	if( result == NULL )
+	{
+		/*
+		 * Copy: Non g_malloc (or compatible) allocator, or static memory,
+		 * so we have to copy, and then unref.
+		 */
+		result = g_memdup( bytes->data, bytes->size );
+		*size = bytes->size;
+		g_bytes_unref( bytes );
+	}
 
-  return result;
+	return result;
 }
 
 /**
@@ -493,14 +463,13 @@ g_bytes_unref_to_data (GBytes *bytes,
  *
  * Since: 2.32
  */
-GByteArray *
-g_bytes_unref_to_array (GBytes *bytes)
+GByteArray *g_bytes_unref_to_array( GBytes *bytes )
 {
-  gpointer data;
-  gsize size;
+	gpointer data;
+	gsize size;
 
-  g_return_val_if_fail (bytes != NULL, NULL);
+	g_return_val_if_fail( bytes != NULL, NULL );
 
-  data = (gpointer) g_bytes_unref_to_data (bytes, &size);
-  return g_byte_array_new_take ( (guint8 *) data, size);
+	data = ( gpointer ) g_bytes_unref_to_data( bytes, &size );
+	return g_byte_array_new_take( ( guint8 * ) data, size );
 }

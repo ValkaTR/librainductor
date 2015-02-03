@@ -22,42 +22,38 @@
 
 #include "gslice.h"
 
-gpointer g_slice_alloc          	(gsize	       block_size)
+gpointer g_slice_alloc( gsize block_size )
 {
-	return malloc(block_size);
+	return malloc( block_size );
 }
 
-gpointer g_slice_alloc0         	(gsize         block_size)
+gpointer g_slice_alloc0( gsize block_size )
 {
-	gpointer *data = malloc(block_size);
-	memset(data, 0, block_size);
+	gpointer *data = malloc( block_size );
+	memset( data, 0, block_size );
 	return data;
 }
 
-gpointer g_slice_copy                   (gsize         block_size,
-                                         gconstpointer mem_block)
+gpointer g_slice_copy( gsize block_size, gconstpointer mem_block )
 {
-	gpointer *data = malloc(block_size);
-	memcpy(data, mem_block, block_size);
+	gpointer *data = malloc( block_size );
+	memcpy( data, mem_block, block_size );
 	return data;
 }
 
-void     g_slice_free1          	(gsize         block_size,
-					 gpointer      mem_block)
+void g_slice_free1( gsize block_size, gpointer mem_block )
 {
-	free(mem_block);
+	free( mem_block );
 }
 
-void     g_slice_free_chain_with_offset (gsize         block_size,
-					 gpointer      mem_chain,
-					 gsize         next_offset)
+void g_slice_free_chain_with_offset( gsize block_size, gpointer mem_chain, gsize next_offset )
 {
 	gpointer slice = mem_chain;
 
-	while (slice)
+	while( slice )
 	{
 		guint8 *current = slice;
-		slice = *(gpointer*) (current + next_offset);
+		slice = *( gpointer * )( current + next_offset );
 		free( current );
 	}
 }

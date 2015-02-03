@@ -78,20 +78,20 @@ G_BEGIN_DECLS
 
 /* Functions like the ones in <ctype.h> that are not affected by locale. */
 typedef enum {
-  G_ASCII_ALNUM  = 1 << 0,
-  G_ASCII_ALPHA  = 1 << 1,
-  G_ASCII_CNTRL  = 1 << 2,
-  G_ASCII_DIGIT  = 1 << 3,
-  G_ASCII_GRAPH  = 1 << 4,
-  G_ASCII_LOWER  = 1 << 5,
-  G_ASCII_PRINT  = 1 << 6,
-  G_ASCII_PUNCT  = 1 << 7,
-  G_ASCII_SPACE  = 1 << 8,
-  G_ASCII_UPPER  = 1 << 9,
-  G_ASCII_XDIGIT = 1 << 10
+	G_ASCII_ALNUM  = 1 << 0,
+	G_ASCII_ALPHA  = 1 << 1,
+	G_ASCII_CNTRL  = 1 << 2,
+	G_ASCII_DIGIT  = 1 << 3,
+	G_ASCII_GRAPH  = 1 << 4,
+	G_ASCII_LOWER  = 1 << 5,
+	G_ASCII_PRINT  = 1 << 6,
+	G_ASCII_PUNCT  = 1 << 7,
+	G_ASCII_SPACE  = 1 << 8,
+	G_ASCII_UPPER  = 1 << 9,
+	G_ASCII_XDIGIT = 1 << 10
 } GAsciiType;
 
-extern const unsigned int * g_ascii_table;
+extern const unsigned int *g_ascii_table;
 
 #define g_ascii_isalnum(c) ((g_ascii_table[(unsigned char) (c)] & G_ASCII_ALNUM) != 0)
 #define g_ascii_islower(c) ((g_ascii_table[(unsigned char) (c)] & G_ASCII_LOWER) != 0)
@@ -147,24 +147,24 @@ typedef unsigned int    guint;
 typedef float   gfloat;
 typedef double  gdouble;
 
-typedef void* gpointer;
+typedef void *gpointer;
 typedef const void *gconstpointer;
 
 
-typedef gint            (*GCompareFunc)         (gconstpointer  a,
-                                                 gconstpointer  b);
-typedef gint            (*GCompareDataFunc)     (gconstpointer  a,
-                                                 gconstpointer  b,
-						 gpointer       user_data);
-typedef gboolean        (*GEqualFunc)           (gconstpointer  a,
-                                                 gconstpointer  b);
-typedef void            (*GDestroyNotify)       (gpointer       data);
-typedef void            (*GFunc)                (gpointer       data,
-                                                 gpointer       user_data);
-typedef guint           (*GHashFunc)            (gconstpointer  key);
-typedef void            (*GHFunc)               (gpointer       key,
-                                                 gpointer       value,
-                                                 gpointer       user_data);
+typedef gint( *GCompareFunc )( gconstpointer  a,
+                               gconstpointer  b );
+typedef gint( *GCompareDataFunc )( gconstpointer  a,
+                                   gconstpointer  b,
+                                   gpointer       user_data );
+typedef gboolean( *GEqualFunc )( gconstpointer  a,
+                                 gconstpointer  b );
+typedef void ( *GDestroyNotify )( gpointer       data );
+typedef void ( *GFunc )( gpointer       data,
+                         gpointer       user_data );
+typedef guint( *GHashFunc )( gconstpointer  key );
+typedef void ( *GHFunc )( gpointer       key,
+                          gpointer       value,
+                          gpointer       user_data );
 
 /**
  * GFreeFunc:
@@ -174,22 +174,22 @@ typedef void            (*GHFunc)               (gpointer       key,
  * data pointer argument and has no return value. It is
  * not currently used in GLib or GTK+.
  */
-typedef void            (*GFreeFunc)            (gpointer       data);
+typedef void ( *GFreeFunc )( gpointer       data );
 
 /**
  * GTranslateFunc:
  * @str: the untranslated string
  * @data: user data specified when installing the function, e.g.
  *  in g_option_group_set_translate_func()
- * 
+ *
  * The type of functions which are used to translate user-visible
  * strings, for <option>--help</option> output.
- * 
+ *
  * Returns: a translation of the string for the current locale.
  *  The returned string is owned by GLib and must not be freed.
  */
-typedef const gchar *   (*GTranslateFunc)       (const gchar   *str,
-						 gpointer       data);
+typedef const gchar    *( *GTranslateFunc )( const gchar   *str,
+        gpointer       data );
 
 
 typedef signed char gint8;
@@ -210,32 +210,21 @@ typedef unsigned int gsize;
 
 // #####################################################################
 
-extern const char * g_utf8_skip;
+extern const char *g_utf8_skip;
 
 // #####################################################################
 
-gint
-(g_atomic_int_get) (volatile gint *atomic);
-void
-(g_atomic_int_set) (volatile gint *atomic,
-                    gint           value);
+gint g_atomic_int_get( volatile gint *atomic );
+void g_atomic_int_set( volatile gint *atomic, gint value );
 
-void
-(g_atomic_int_inc) (volatile gint *atomic);
-gboolean
-(g_atomic_int_dec_and_test) (volatile gint *atomic);
+void g_atomic_int_inc( volatile gint *atomic );
+gboolean g_atomic_int_dec_and_test( volatile gint *atomic );
 
-static inline word
-g_utf8_get_char_extended ( const char *p,
-			  ssize_t max_len);
+static inline word g_utf8_get_char_extended( const char *p, ssize_t max_len );
 
 // #####################################################################
 
-void g_qsort_with_data (gconstpointer    pbase,
-			gint             total_elems,
-			gsize            size,
-			GCompareDataFunc compare_func,
-			gpointer         user_data);
+void g_qsort_with_data( gconstpointer pbase, gint total_elems, gsize size, GCompareDataFunc compare_func, gpointer user_data );
 
 // #####################################################################
 
