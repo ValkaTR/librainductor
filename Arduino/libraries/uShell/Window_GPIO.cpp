@@ -83,7 +83,7 @@ gpio_pins[] =
 // functions
 //
 
-int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
 	struct GPIO_CLASS *gpio = (struct GPIO_CLASS *) window->user_def;
 	
@@ -111,7 +111,7 @@ int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command,
 			entry_class->label_align = ENTRY_LABEL_LEFT;
 
 			struct WINDOW_CLASS *entry;
-			/*entry = window_create(
+			entry = window_create(
 				window->ushell,
 				window,
 				"label:",
@@ -120,8 +120,8 @@ int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command,
 				entry_def_wnd_proc,
 				entry_class
 			);
-			
-			entry_set_text( entry, "test" );*/
+
+			entry_set_text( entry, "test" );
 
 			break;
 		}

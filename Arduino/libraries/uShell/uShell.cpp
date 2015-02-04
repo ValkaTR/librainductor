@@ -34,6 +34,8 @@ struct USHELL_CLASS *ushell_init(
 	ushell->cmd_prev_ch = 0;
 	ushell->print_callback = proccess_print;
 	ushell->print_user_def = user_def;
+	
+	ushell->message_bank = cyclic_stack_new( sizeof(struct WINDOW_MESSAGE), 8 );
 	ushell->window_list = g_ptr_array_sized_new( 8 );
 
 	struct CONSOLE_CLASS  *console = (struct CONSOLE_CLASS  *) console_init( 80, 24 );
@@ -53,21 +55,77 @@ struct USHELL_CLASS *ushell_init(
 
 // ############################################################################
 
-void ushell_proccess_loop( struct USHELL_CLASS *ushell )
+float timer1 = 0;
+void ushell_proccess_loop( struct USHELL_CLASS *ushell, unsigned long tick_value, signed char tick_factor  )
 {
 	// TODO: Timers and redraw
+	float tick = tick_value * pow(10, tick_factor);
+	
+	/*if( timer1 + 0.2 < tick )
+	{
+		timer1 = tick;
+		GString *str_tmp = g_string_sized_new( 32 );
+		
+		g_string_printf( str_tmp, "[ %10.1f ]", tick );
+
+		console_print_full( ushell->console, 63, 2, false, false, VT100_COLOR_WHITE, VT100_COLOR_RED, str_tmp->str );
+		console_swap_buffers( ushell->console );
+		
+		g_string_free( str_tmp, true );
+	}*/
+}
+
+void ushell_add_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg )
+{
+	cyclic_stack_push( ushell->message_bank, msg );
+}
+
+bool ushell_get_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg_out )
+{
+	// Get latest message
+	bool result = cyclic_stack_pop( ushell->message_bank, msg_out );
+
+	return result;
+}
+
+void ushell_dispatch_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg )
+{
+	if( msg != NULL )
+	{
+		if( msg->window != NULL )
+		{
+			// Message to the window
+			msg->window->wnd_proc( msg->window, msg->command, msg->uParam, msg->vParam );
+		}
+		else
+		{
+			// Message to the root
+			if( msg->command == WM_SERIAL_EVENT )
+			{
+				char ch = msg->vParam;
+				if( ushell->cmd_escape_buf->len > 0 )
+					ushell_proccess_escape( ushell, ch );
+				else
+					ushell_proccess_char( ushell, ch );
+
+				ushell->cmd_prev_ch = ch;
+			}
+		}
+	}
 }
 
 // ############################################################################
 
 void ushell_proccess_event( struct USHELL_CLASS *ushell, char ch )
 {
-	if( ushell->cmd_escape_buf->len > 0 )
-		ushell_proccess_escape( ushell, ch );
-	else
-		ushell_proccess_char( ushell, ch );
-
-	ushell->cmd_prev_ch = ch;
+	struct WINDOW_MESSAGE msg =
+	{
+		.window = NULL,
+		.command = WM_SERIAL_EVENT,
+		.uParam = 0,
+		.vParam = ch
+	};
+	ushell_add_message( ushell, &msg );
 }
 
 // ############################################################################

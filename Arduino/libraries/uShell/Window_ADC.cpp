@@ -39,7 +39,7 @@
 // functions
 //
 
-int adc_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int adc_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
 	struct GPIO_CLASS *adc = (struct GPIO_CLASS *) window->user_def;
 	

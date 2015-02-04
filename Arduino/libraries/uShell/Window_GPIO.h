@@ -40,7 +40,7 @@ struct GPIO_CLASS
 // function declarations
 //
 
-int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 
 // #############################################################################
 

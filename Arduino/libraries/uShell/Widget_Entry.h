@@ -52,7 +52,7 @@ struct ENTRY_CLASS
 
 void entry_set_text( struct WINDOW_CLASS *window, char *text );
 
-int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 
 // #############################################################################
 

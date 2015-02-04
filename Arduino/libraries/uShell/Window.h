@@ -18,7 +18,6 @@
 //
 
 #include "uShell.h"
-#include "Window.h"
 #include "Console.h"
 #include "garray.h"
 
@@ -32,14 +31,31 @@ G_BEGIN_DECLS
 // class declarations
 //
 
-enum WINDOW_MESSAGE
+//
+// Messages
+//
+
+enum WINDOW_COMMAND
 {
 	WM_CREATE = 1,
 	WM_DESTROY,
 	WM_PAINT,
 	WM_KEY_EVENT,
-	WM_CHARACTER
+	WM_CHARACTER,
+	WM_SERIAL_EVENT
 };
+
+struct WINDOW_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	int uParam;
+	int vParam;
+};
+
+//
+// Window attributes
+//
 
 struct WINDOW_RECT
 {
@@ -62,6 +78,10 @@ struct WINDOW_ATTRIBUTES
 	enum WINDOW_BORDER_STYLE border_style;
 };
 
+//
+// Main window class
+//
+
 struct WINDOW_CLASS
 {
 	char *title;
@@ -73,7 +93,7 @@ struct WINDOW_CLASS
 
 	GPtrArray *widgets;
 	
-	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 
 	int cursor_x;
 	int cursor_y;
@@ -97,18 +117,18 @@ struct WINDOW_CLASS *window_create(
 	const char *title,
 	struct WINDOW_ATTRIBUTES *attributes,
 	struct WINDOW_RECT *rect,
-	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam ),
+	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam ),
 	void *user_def
 );
 	
-int window_send_message( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+int window_send_message( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 struct WINDOW_CLASS *window_get_active( struct USHELL_CLASS *ushell );
 void window_write_text_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *str );
 void window_write_text( struct WINDOW_CLASS *window, int x, int y, char *str );
 void window_write_cell_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char ch );
 void window_write_cell( struct WINDOW_CLASS *window, int x, int y, char ch );
 
-int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 
 // #############################################################################
 

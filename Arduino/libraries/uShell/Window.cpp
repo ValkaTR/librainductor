@@ -27,7 +27,7 @@ struct WINDOW_CLASS *window_create(
 	const char *title,
 	struct WINDOW_ATTRIBUTES *attributes,
 	struct WINDOW_RECT *rect,
-	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam ),
+	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam ),
 	void *user_def
 )
 {
@@ -80,10 +80,17 @@ struct WINDOW_CLASS *window_create(
 
 // #############################################################################
 
-int window_send_message( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int window_send_message( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
-	if( window->wnd_proc != NULL )
-		window->wnd_proc( window, command, uParam, vParam );
+	struct WINDOW_MESSAGE msg =
+	{
+		.window = window,
+		.command = command,
+		.uParam = uParam,
+		.vParam = vParam
+	};
+	
+	ushell_add_message( window->ushell, &msg );
 }
 
 // #############################################################################
@@ -139,7 +146,7 @@ void window_write_cell( struct WINDOW_CLASS *window, int x, int y, char ch )
 
 // #############################################################################
 
-int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
 	switch( command )
 	{
@@ -192,30 +199,13 @@ int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, i
 			// Draw all widgets
 			if( window->widgets != NULL && window->widgets->len > 0 )
 			{
-				for( int i = 0; window->widgets->pdata[i]; i++ )
+				for( int i = 0; window->widgets->len < i; i++ )
 				{
-					struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) window->widgets->pdata[i];
+					struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) (window->widgets->pdata[i]);
 					window_send_message( widget, WM_PAINT, 0, 0 );
 				}
 			}
-			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
-			console_swap_buffers( window->console );
-			
-			break;
-		}
-		
-	}
-	
-	return 0;
-}
 
-int widget_def_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
-{
-	switch( command )
-	{
-
-		case WM_PAINT:
-		{
 			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
 			console_swap_buffers( window->console );
 			

@@ -47,7 +47,7 @@ void prompt_redraw_message( struct WINDOW_CLASS *window )
 
 // #############################################################################
 
-int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
 	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) window->user_def;
 	

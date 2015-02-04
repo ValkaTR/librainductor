@@ -17,6 +17,7 @@
 // includes of local headers
 //
 
+#include "CyclicStack.h"
 #include "Window.h"
 #include "Console.h"
 #include "gstring.h"
@@ -316,6 +317,7 @@ struct USHELL_CLASS
 	//
 	
 	GPtrArray *window_list;
+	struct CYCLIC_STACK *message_bank;
 };
 
 // #############################################################################
@@ -324,12 +326,16 @@ struct USHELL_CLASS
 
 struct USHELL_CLASS *ushell_init( void (*proccess_print) ( char *, void * ), void *user_def );
 
-void ushell_proccess_loop( struct USHELL_CLASS *ushell );
+void ushell_proccess_loop( struct USHELL_CLASS *ushell, unsigned long tick_value, signed char tick_factor  );
 void ushell_proccess_event( struct USHELL_CLASS *ushell, char ch );
 void ushell_proccess_print( struct USHELL_CLASS *ushell, char *str );
 
 struct USHELL_WINDOW *ushell_create_window( int x, int y, int w, int h, struct USHELL_WINDOW_ATTRIBUTES *attributes, int (*callback_proc) (struct USHELL_WINDOW *window, int command, int uParam, int vParam ) );
 int ushell_send_command( struct USHELL_WINDOW *window, int command, int uParam, int vParam );
+
+void ushell_add_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg );
+bool ushell_get_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg_out );
+void ushell_dispatch_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg );
 
 //
 // Key event proccessing

@@ -58,7 +58,7 @@ struct PROMPT_CLASS
 
 void prompt_print( struct WINDOW_CLASS *win, char *str );
 
-int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam );
+int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 
 void prompt_proccess_cmd( struct WINDOW_CLASS *win, char *command_line );
 static GSList *tokenize_command_line( struct WINDOW_CLASS *win, const gchar *command_line );

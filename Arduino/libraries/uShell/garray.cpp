@@ -24,6 +24,25 @@
  * GLib at ftp://ftp.gtk.org/pub/gtk/.
  */
 
+	// Test GArray
+	/*GArray *array = g_array_sized_new( false, false, sizeof(int), 4 );
+	int x;
+	x = 55; g_array_append_vals( array, &x, 1 );
+	x = 1; g_array_append_vals( array, &x, 1 );
+	x = 1448; g_array_append_vals( array, &x, 1 );
+	x = 13; g_array_append_vals( array, &x, 1 );
+	x = 314159; g_array_append_vals( array, &x, 1 );
+	for( int i = i < array->len - 1; i > 0 ; i-- )
+	{
+		Serial.print( "[" );
+		Serial.print( i );
+		Serial.print( ": " );
+		x = ((int *) (array->data))[array->len - 1];
+		Serial.print( x );
+		Serial.println( "]" );
+		g_array_remove_index( array, array->len - 1 );
+	}*/
+
 /*
  * MT safe
  */

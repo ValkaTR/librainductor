@@ -31,7 +31,7 @@ void entry_set_text( struct WINDOW_CLASS *window, char *text )
 
 // #############################################################################
 
-int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command, int uParam, int vParam )
+int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
 {
 	struct ENTRY_CLASS *entry = (struct ENTRY_CLASS *) window->user_def;
 	
@@ -64,7 +64,7 @@ int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_MESSAGE command
 			//
 			// Print label if alignment is specified
 			//
-			
+
 			int label_len = strlen( window->title );
 			if( label_len > entry->label_width )
 				label_len = entry->label_width;

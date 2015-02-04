@@ -31,6 +31,7 @@
 #include "Window_Prompt.h"
 #include "Window_GPIO.h"
 
+#include "CyclicStack.h"
 #include "garray.h"
 
 void cmd_func_help( struct WINDOW_CLASS *win, GSList *token_list );
@@ -130,29 +131,22 @@ void setup( )
 		prompt_class
 	);
 	
-	//
-	
 	// declare the ledPin as an OUTPUT:
 	pinMode( ledPin, OUTPUT );
 }
 
 // ############################################################################
 
-unsigned long timer1 = 0;
-
 void loop( )
 {
-	/*if( timer1 + 100 < millis( ) )
-	{
-		timer1 = millis( );
-		GString *str_tmp = g_string_sized_new( 32 );
-		g_string_printf( str_tmp, "[ %10.1f ]", (float) (timer1 / 1000.0) );
-		console_print( ushell->console, 63, 2, false, false, 7, 1, str_tmp->str );
-		console_swap_buffers( ushell->console );
-		g_string_free( str_tmp, true );
-	}*/
+	ushell_proccess_loop( ushell, millis( ), -3 );
 
-	ushell_proccess_loop( ushell );
+	struct WINDOW_MESSAGE msg;
+	bool msg_result = ushell_get_message( ushell, &msg );
+	if( msg_result == true )
+	{
+		ushell_dispatch_message( ushell, &msg );
+	}
 }
 
 // ############################################################################
