@@ -25,7 +25,7 @@ CXX_FLAGS = \
 # uShell library
 
 USHELL_PATH = /home/valka/Документы/Arduino/libraries/uShell
-USHELL_SOURCES = uShell.cpp Console.cpp Widget_Entry.cpp Window.cpp Window_ADC.cpp Window_GPIO.cpp Window_Prompt.cpp CyclicStack.cpp gslice.cpp gstring.cpp gslist.cpp garray.cpp gbytes.cpp gcommon.cpp
+USHELL_SOURCES = uShell.cpp Console.cpp Widget_Entry.cpp Window.cpp Window_ADC.cpp Window_GPIO.cpp Window_Prompt.cpp Window_Manager.cpp CyclicStack.cpp gslice.cpp gstring.cpp gslist.cpp garray.cpp gbytes.cpp gcommon.cpp
 USHELL_OBJ = ${patsubst %.cpp, $(BUILD_DIR)/uShell/%.o, ${USHELL_SOURCES}}
 
 build/uShell/%.o: $(USHELL_PATH)/%.cpp $(USHELL_PATH)/%.h
@@ -130,6 +130,7 @@ $(BUILD_DIR)/librainductor.elf: librainductor_x variant $(BUILD_DIR)/core.a
 		$(BUILD_DIR)/uShell/Window_ADC.o \
 		$(BUILD_DIR)/uShell/Window_GPIO.o \
 		$(BUILD_DIR)/uShell/Window_Prompt.o \
+		$(BUILD_DIR)/uShell/Window_Manager.o \
 		$(BUILD_DIR)/uShell/CyclicStack.o \
 		$(BUILD_DIR)/librainductor.o \
 		$(BUILD_DIR)/variant.o \

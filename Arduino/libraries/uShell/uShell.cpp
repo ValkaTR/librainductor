@@ -118,6 +118,10 @@ void ushell_dispatch_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE
 
 void ushell_proccess_event( struct USHELL_CLASS *ushell, char ch )
 {
+	/*Serial.print( "[proccess_event, " );
+	Serial.print( (int) ch );
+	Serial.println( "]" );*/
+	
 	struct WINDOW_MESSAGE msg =
 	{
 		.window = NULL,
@@ -271,6 +275,10 @@ void ushell_proccess_escape( struct USHELL_CLASS *ushell, char ch )
 		// Unknown control code
 		default:
 		{
+			struct WINDOW_CLASS *win = window_get_active( ushell );
+			if( win != NULL )
+				window_send_message( win, WM_KEY_EVENT, ushell->cmd_control_character, ch );
+
 			ushell_escape_end( ushell );
 		}
 	}

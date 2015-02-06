@@ -139,9 +139,9 @@ void console_swap_buffers( struct CONSOLE_CLASS *console )
 			
 			// Color change
 			g_string_truncate( style, 0 );
-			if( console->buffer1[i + j * console->w].bold != console->buffer2[i + j * console->w].bold ||
-				console->buffer1[i + j * console->w].fg_color != console->buffer2[i + j * console->w].fg_color ||
-				console->buffer1[i + j * console->w].bg_color != console->buffer2[i + j * console->w].bg_color )
+			//if( console->buffer1[i + j * console->w].bold != console->buffer2[i + j * console->w].bold ||
+			//	console->buffer1[i + j * console->w].fg_color != console->buffer2[i + j * console->w].fg_color ||
+			//	console->buffer1[i + j * console->w].bg_color != console->buffer2[i + j * console->w].bg_color )
 			{
 				char num_tmp[32];
 				
@@ -272,7 +272,20 @@ void console_print( struct CONSOLE_CLASS *console, int _x, int _y, char *value )
 
 // #############################################################################
 
-void console_copy_rect( struct CONSOLE_CLASS *console, struct CONSOLE_BUFFER_CELL *buffer, int x, int y, int w, int h )
+void console_copy_rect( struct CONSOLE_BUFFER_CELL *dst, struct WINDOW_RECT *rect_dst, struct CONSOLE_BUFFER_CELL *src, struct WINDOW_RECT *rect_src )
+{
+	for( int j = 0; j < rect_src->h; j++ )
+	for( int i = 0; i < rect_src->w; i++ )
+	{
+		memcpy(
+			&dst[(i + rect_src->x) + (j + rect_src->y) * rect_dst->w],
+			&src[i + j * rect_src->w],
+			sizeof(struct CONSOLE_BUFFER_CELL)
+		);
+	}
+}
+
+void console_copy_rect_a( struct CONSOLE_CLASS *console, struct CONSOLE_BUFFER_CELL *buffer, int x, int y, int w, int h )
 {
 	for( int j = 0; j < h; j++ )
 	for( int i = 0; i < w; i++ )

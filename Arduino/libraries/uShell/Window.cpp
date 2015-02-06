@@ -55,11 +55,11 @@ struct WINDOW_CLASS *window_create(
 	window->ushell = ushell;
 	window->console = ushell->console;
 
-	window->widgets = g_ptr_array_new( );
+	window->widget_list = g_ptr_array_new( );
 	if( parent != NULL )
 	{
 		window->parent = parent;
-		g_ptr_array_add( parent->widgets, window );
+		g_ptr_array_add( parent->widget_list, window );
 	}
 	else
 	{
@@ -152,66 +152,64 @@ int window_def_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, i
 	{
 		case WM_PAINT:
 		{
-			if( window->attributes.border_style == WINDOW_BORDER_DOUBLE )
-			{
-				// Vertical and Horizontal
-				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, 0, 0xCD /* ═ */ );
-				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, window->rect.h - 1, 0xCD /* ═ */ );
-				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, 0, j, 0xBA /* ║ */ );
-				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, window->rect.w - 1, j, 0xBA /* ║ */ );
-				
-				// Corners
-				window_write_cell( window, 0, 0, 0xC9 /* ╔ */ );
-				window_write_cell( window, 0, window->rect.h - 1, 0xC8 /* ╚ */ );
-				window_write_cell( window, window->rect.w - 1, 0, 0xBB /* ╗ */ );
-				window_write_cell( window, window->rect.w - 1, window->rect.h - 1, 0xBC /* ╝ */ );
-			}
-			else if( window->attributes.border_style == WINDOW_BORDER_SINGLE )
-			{
-				// Vertical and Horizontal
-				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, 0, 0xC4 /* ─ */ );
-				for( int i = 0; i < window->rect.w; i++ ) window_write_cell( window, i, window->rect.h - 1, 0xC4 /* ─ */ );
-				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, 0, j, 0xB3 /* │ */ );
-				for( int j = 0; j < window->rect.h; j++ ) window_write_cell( window, window->rect.w - 1, j, 0xB3 /* │ */ );
-				
-				// Corners
-				window_write_cell( window, 0, 0, 0xDA /* ┌ */ );
-				window_write_cell( window, 0, window->rect.h - 1, 0xC0 /* └ */ );
-				window_write_cell( window, window->rect.w - 1, 0, 0xBF /* ┐ */ );
-				window_write_cell( window, window->rect.w - 1, window->rect.h - 1, 0xD9 /* ┘ */ );
-			}
-
-			// Shadow
-			//for( int i = 1; i < window->rect.w + 1; i++ ) window_write_cell( window, i, window->rect.h, 0xB0 /* ░ */ );
-			//for( int j = 1; j < window->rect.h + 1; j++ ) window_write_cell( window, window->rect.w, j, 0xB0 /* ░ */ );
-			// Title
-			if( window->attributes.border_style != WINDOW_BORDER_NONE )
-			{
-				int title_len = strlen( window->title );
-				char title_offset = 4;
-				for( int i = 0; i < title_len; i++ ) window_write_cell( window, i + title_offset, 0, window->title[i] );
-				window_write_cell( window, title_offset - 2, 0, '[' );
-				window_write_cell( window, title_offset - 1, 0, ' ' );
-				window_write_cell( window, title_offset + title_len, 0, ' ' );
-				window_write_cell( window, title_offset + title_len + 1, 0, ']' );
-			}
-			
 			// Draw all widgets
-			if( window->widgets != NULL && window->widgets->len > 0 )
+			if( window->widget_list != NULL && window->widget_list->len > 0 )
 			{
-				for( int i = 0; window->widgets->len < i; i++ )
+				for( int i = 0; window->widget_list->len < i; i++ )
 				{
-					struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) (window->widgets->pdata[i]);
+					struct WINDOW_CLASS *widget = (struct WINDOW_CLASS *) (window->widget_list->pdata[i]);
 					window_send_message( widget, WM_PAINT, 0, 0 );
 				}
 			}
 
-			console_copy_rect( window->console, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
-			console_swap_buffers( window->console );
+			if( window->parent == NULL )
+			{
+				console_copy_rect( window->console->buffer_current, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
+				console_swap_buffers( window->console );
+			}
+			else
+			{
+				console_copy_rect( window->parent->paint_buffer, window->paint_buffer, window->rect.x, window->rect.y, window->rect.w, window->rect.h );
+			}
 			
 			break;
 		}
-		
+
+		case WM_CHARACTER:
+		{
+			char ch = (char) vParam;
+			/*Serial.print( "[character, " );
+			Serial.print( uParam );
+			Serial.print( ", " );
+			Serial.print( vParam );
+			Serial.println( "]" );*/
+
+			switch( ch )
+			{
+				case 14:	// Ctrl+N
+				{
+					window->active_widget += 1;
+					if( window->active_widget == window->widget_list->len - 1 )
+						window->active_widget = 0;
+					window_send_message( window, WM_PAINT, 0, 0 );
+					break;
+				}
+				
+				case 16:	// Ctrl+P
+				{
+					window->active_widget -= 1;
+					if( window->active_widget == -1 )
+						window->active_widget = window->widget_list->len - 1;
+					window_send_message( window, WM_PAINT, 0, 0 );
+					break;
+				}
+			}
+			Serial.print( "[active_window_id, " );
+			Serial.print( window->active_widget );
+			Serial.println( ", " );
+			Serial.print( window->widget_list->len );
+			Serial.println( "]" );
+			break;
 	}
 	
 	return 0;

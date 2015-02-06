@@ -91,7 +91,8 @@ struct WINDOW_CLASS
 	
 	struct CONSOLE_BUFFER_CELL *paint_buffer;
 
-	GPtrArray *widgets;
+	GPtrArray *widget_list;
+	int active_widget;
 	
 	int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
 

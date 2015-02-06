@@ -81,7 +81,8 @@ int entry_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command
 
 			window_write_cell( window, entry->label_width, 0, '[' );
 			window_write_cell( window, window->rect.w - 1, 0, ']' );
-			window_write_text( window, entry->label_width + 2, 0, entry->text->str );
+			//window_write_text( window, entry->label_width + 2, 0, entry->text->str );
+			window_write_text( window, entry->label_width + 2, 0, "test" );
 
 			break;
 		}
