@@ -17,9 +17,7 @@
 // includes of local headers
 //
 
-#include "Window.h"
-#include "gslist.h"
-#include "garray.h"
+#include "uShell.h"
 
 G_BEGIN_DECLS
 
@@ -56,9 +54,15 @@ struct PROMPT_CLASS
 // function declarations
 //
 
+struct WINDOW_CLASS *prompt_create( struct USHELL_CLASS *ushell, struct PROMPT_COMMAND *command_list, int x, int y, int w, int h );
+
 void prompt_print( struct WINDOW_CLASS *win, char *str );
 
-int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
+bool prompt_create_proc( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def );
+bool prompt_destroy_proc( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def );
+bool prompt_paint_proc( struct WINDOW_CLASS *window, struct WINDOW_PAINT_MESSAGE *msg, void *user_def );
+bool prompt_key_event_proc( struct WINDOW_CLASS *window, struct WINDOW_KEY_EVENT_MESSAGE *msg, void *user_def );
+bool prompt_character_proc( struct WINDOW_CLASS *window, struct WINDOW_CHARACTER_MESSAGE *msg, void *user_def );
 
 void prompt_proccess_cmd( struct WINDOW_CLASS *win, char *command_line );
 static GSList *tokenize_command_line( struct WINDOW_CLASS *win, const gchar *command_line );

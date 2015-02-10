@@ -21,6 +21,48 @@
 // #############################################################################
 // functions
 
+struct WINDOW_CLASS *prompt_create( struct USHELL_CLASS *ushell, struct PROMPT_COMMAND *command_list, int x, int y, int w, int h )
+{
+	struct WINDOW_ATTRIBUTES window_attributes =
+	{
+		.fg_color = VT100_COLOR_DEFAULT,
+		.bg_color = VT100_COLOR_DEFAULT,
+		.border_style = WINDOW_BORDER_DOUBLE
+	};
+	
+	struct WINDOW_RECT window_rect =
+	{
+		.x = x, .y = y,
+		.w = w, .h = h
+	};
+	
+	struct PROMPT_CLASS *window_class = malloc( sizeof(struct PROMPT_CLASS) );
+	memset( window_class, 0, sizeof(struct PROMPT_CLASS) );
+	window_class->command_list = command_list;
+	window_class->prompt = "librainductor> ";
+
+	struct WINDOW_CLASS *window = window_create(
+		ushell,
+		NULL,
+		"Prompt",
+		&window_attributes,
+		&window_rect,
+		window_class
+	);
+	
+	window->create_proc = prompt_create_proc;
+	window->destroy_proc = prompt_destroy_proc;
+	window->paint_proc = prompt_paint_proc;
+	window->key_event_proc = prompt_key_event_proc;
+	window->character_proc = prompt_character_proc;
+
+	ushell_register_window( ushell, window );
+	
+	return window;
+}
+
+// #############################################################################
+
 void prompt_print( struct WINDOW_CLASS *win, char *str )
 {
 	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) win->user_def;
@@ -41,180 +83,187 @@ void prompt_redraw_message( struct WINDOW_CLASS *window )
 	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) window->user_def;
 	
 	// Update cursor position on window coordinates
-	window->cursor_x = prompt->cursor_position + prompt->prompt_len + 2;
-	window_send_message( window, WM_PAINT, 0, 0 );
+	window->cursor_x = prompt->cursor_position + prompt->prompt_len + 1;
+
+	struct WINDOW_PAINT_MESSAGE paint_msg =
+	{
+		.window = window,
+		.command = WM_PAINT,
+		.buffer = window->paint_buffer
+	};
+	
+	ushell_send_message( window->ushell, &paint_msg );
 }
 
-// #############################################################################
+// ############################################################################
 
-int prompt_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam )
+bool prompt_create_proc( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def )
 {
 	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) window->user_def;
 	
-	switch( command )
+	// Prepare log matrix
+	if( prompt->log_size == 0 || prompt->log_size > 32 )
+		prompt->log_size = 10;
+	prompt->log_position = 0;
+	prompt->log_matrix = g_ptr_array_sized_new( prompt->log_size );
+	for( int i = 0; i < prompt->log_size; i++ )
 	{
-		case WM_CREATE:
-		{
-			// Prepare log matrix
-			if( prompt->log_size == 0 || prompt->log_size > 32 )
-				prompt->log_size = 10;
-			prompt->log_position = 0;
-			prompt->log_matrix = g_ptr_array_sized_new( prompt->log_size );
-			for( int i = 0; i < prompt->log_size; i++ )
-			{
-				GString *str = g_string_sized_new( 32 );
-				g_ptr_array_add( prompt->log_matrix, str );
-			}
+		GString *str = g_string_sized_new( 32 );
+		g_ptr_array_add( prompt->log_matrix, str );
+	}
 
-			// Prepare input line buffer
-			prompt->prompt_len = strlen( prompt->prompt );
-			prompt->cursor_position = 0;
-			prompt->input_line = g_string_sized_new( 32 );
-			
-			// Set cursor position to appropriate place
-			window->cursor_x = prompt->cursor_position + prompt->prompt_len + 2;
-			window->cursor_y = window->rect.h - 2;
+	// Prepare input line buffer
+	prompt->prompt_len = strlen( prompt->prompt );
+	prompt->cursor_position = 0;
+	prompt->input_line = g_string_sized_new( 32 );
 
-			break;
-		}
-		
-		case WM_DESTROY:
-		{
-			for( int i = 0; i < prompt->log_matrix->len; i++ )
-			{
-				GString *log_line = (GString *) g_ptr_array_index( prompt->log_matrix, i );
-				g_string_free( log_line, true );
-			}
-			g_ptr_array_free( prompt->log_matrix, true );
-			
-			g_string_free( prompt->input_line, true );
-
-			break;
-		}
-		
-		case WM_PAINT:
-		{
-			// Vertical and Horizontal
-			for( int i = 0; i < window->rect.w; i++ )
-			for( int j = 0; j < window->rect.h; j++ )
-			{
-				if( j != window->rect.h - 3 )
-					window_write_cell( window, i, j, ' ' );
-				else
-					window_write_cell( window, i, j, 0xC4 /* ─ */ );
-			}
-
-			// Input line
-			window_write_text( window, 2, window->rect.h - 2, prompt->prompt );
-			window_write_text( window, prompt->prompt_len + 2, window->rect.h - 2, prompt->input_line->str );
-
-			// Print log matrix
-			for( int i = 0; (i < window->rect.h - 4) && (i < prompt->log_matrix->len); i++ )
-			{
-				// Get line from log matrix
-				GString *log_line = (GString *) g_ptr_array_index(
-					prompt->log_matrix,
-					(prompt->log_matrix->len - 1 + prompt->log_position - i) % prompt->log_matrix->len
-				);
-				
-				// Clear the line first, then write
-				window_write_text( window, 2, window->rect.h - 4 - i, log_line->str );
-			}
-
-			break;
-		}
-
-		case WM_CHARACTER:
-		{
-			char ch = (char) vParam;
-			
-			switch( ch )
-			{
-				case 0x0D:	// Enter
-				{
-					// Print entered statement to log matrix
-					GString *output = g_string_sized_new( 32 );
-					g_string_append( output, prompt->prompt );
-					g_string_append( output, prompt->input_line->str );
-					prompt_print( window, output->str );
-					g_string_free( output, true );
-					
-					// Execute the command
-					prompt_proccess_cmd( window, prompt->input_line->str );
-					
-					// Reset input prompt
-					g_string_truncate( prompt->input_line, 0 );
-					prompt->cursor_position = 0;
-					
-					break;
-				}
-				
-				case 0x7F:	// Backspace
-				{
-					if( prompt->cursor_position > 0 )
-					{
-						prompt->cursor_position -= 1;
-						g_string_erase( prompt->input_line, prompt->cursor_position, 1 );
-					}
-					break;
-				}
-				
-				default:	// Character
-				{
-					g_string_append_c( prompt->input_line, ch );
-					prompt->cursor_position += 1;
-
-					break;
-				}
-			}
-		
-			prompt_redraw_message( window );
+	// Set cursor position to appropriate place
+	window->cursor_x = prompt->cursor_position + prompt->prompt_len + 1;
+	window->cursor_y = window->rect.h - 1;
 	
-			break;
+	return true;
+}
+
+bool prompt_destroy_proc( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def )
+{
+	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) user_def;
+	
+	for( int i = 0; i < prompt->log_matrix->len; i++ )
+	{
+		GString *log_line = (GString *) g_ptr_array_index( prompt->log_matrix, i );
+		g_string_free( log_line, true );
+	}
+	g_ptr_array_free( prompt->log_matrix, true );
+	
+	g_string_free( prompt->input_line, true );
+	
+	return true;
+}
+
+bool prompt_paint_proc( struct WINDOW_CLASS *window, struct WINDOW_PAINT_MESSAGE *msg, void *user_def )
+{
+	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) user_def;
+	
+	// Vertical and Horizontal
+	for( int i = 0; i < window->rect.w; i++ )
+	for( int j = 0; j < window->rect.h; j++ )
+	{
+		if( j != window->rect.h - 2 )
+			window_write_cell( window, i, j, ' ' );
+		else
+			window_write_cell( window, i, j, 0xC4 /* ─ */ );
+	}
+
+	// Input line
+	window_write_text( window, 1, window->rect.h - 1, prompt->prompt );
+	window_write_text( window, prompt->prompt_len + 1, window->rect.h - 1, prompt->input_line->str );
+
+	// Print log matrix
+	for( int i = 0; (i < window->rect.h - 2) && (i < prompt->log_matrix->len); i++ )
+	{
+		// Get line from log matrix
+		GString *log_line = (GString *) g_ptr_array_index(
+			prompt->log_matrix,
+			(prompt->log_matrix->len - 1 + prompt->log_position - i) % prompt->log_matrix->len
+		);
+		
+		// Clear the line first, then write
+		window_write_text( window, 1, window->rect.h - 3 - i, log_line->str );
+	}
+	
+	return true;
+}
+
+bool prompt_key_event_proc( struct WINDOW_CLASS *window, struct WINDOW_KEY_EVENT_MESSAGE *msg, void *user_def )
+{
+	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) user_def;
+	
+	switch( msg->ch )
+	{
+		case VK_LEFT:
+		{
+			 if( prompt->cursor_position > 0 )
+			 {
+				 prompt->cursor_position -= 1;
+				 Serial.print( "\x1B[D" );	// Move cursor left
+			 }
+
+			 break;
 		}
 
-		case WM_KEY_EVENT:
+		case VK_RIGHT:
 		{
-			switch( vParam )
+			 if( prompt->input_line->len > prompt->cursor_position )
+			 {
+				 prompt->cursor_position += 1;
+				 Serial.print( "\x1B[C" );	// Move cursor left
+			 }
+
+			 break;
+		}
+		
+		case VK_DELETE:
+		{
+			if( prompt->cursor_position < prompt->input_line->len )
 			{
-				case VK_LEFT:
-				{
-					 if( prompt->cursor_position > 0 )
-					 {
-						 prompt->cursor_position -= 1;
-						 Serial.print( "\x1B[D" );	// Move cursor left
-					 }
-
-					 break;
-				}
-
-				case VK_RIGHT:
-				{
-					 if( prompt->input_line->len > prompt->cursor_position )
-					 {
-						 prompt->cursor_position += 1;
-						 Serial.print( "\x1B[C" );	// Move cursor left
-					 }
-
-					 break;
-				}
-				
-				case VK_DELETE:
-				{
-					if( prompt->cursor_position < prompt->input_line->len )
-					{
-						g_string_erase( prompt->input_line, prompt->cursor_position, 1 );
-						prompt_redraw_message( window );
-					}
-					
-					break;
-				}
+				g_string_erase( prompt->input_line, prompt->cursor_position, 1 );
+				prompt_redraw_message( window );
 			}
+			
 			break;
 		}
 	}
 	
-	return window_def_proc( window, command, uParam, vParam );
+	return true;
+}
+
+bool prompt_character_proc( struct WINDOW_CLASS *window, struct WINDOW_CHARACTER_MESSAGE *msg, void *user_def )
+{
+	struct PROMPT_CLASS *prompt = (struct PROMPT_CLASS *) user_def;
+
+	switch( msg->ch )
+	{
+		case 0x0D:	// Enter
+		{
+			// Print entered statement to log matrix
+			GString *output = g_string_sized_new( 32 );
+			g_string_append( output, prompt->prompt );
+			g_string_append( output, prompt->input_line->str );
+			prompt_print( window, output->str );
+			g_string_free( output, true );
+			
+			// Execute the command
+			prompt_proccess_cmd( window, prompt->input_line->str );
+			
+			// Reset input prompt
+			g_string_truncate( prompt->input_line, 0 );
+			prompt->cursor_position = 0;
+			
+			break;
+		}
+		
+		case 0x7F:	// Backspace
+		{
+			if( prompt->cursor_position > 0 )
+			{
+				prompt->cursor_position -= 1;
+				g_string_erase( prompt->input_line, prompt->cursor_position, 1 );
+			}
+			break;
+		}
+		
+		default:	// Character
+		{
+			g_string_append_c( prompt->input_line, msg->ch );
+			prompt->cursor_position += 1;
+
+			break;
+		}
+	}
+
+	prompt_redraw_message( window );
+	
+	return true;
 }
 
 // ############################################################################

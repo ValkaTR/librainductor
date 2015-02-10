@@ -17,9 +17,7 @@
 // includes of local headers
 //
 
-#include "Window.h"
-#include "gslist.h"
-#include "garray.h"
+#include "uShell.h"
 
 G_BEGIN_DECLS
 
@@ -40,7 +38,10 @@ struct GPIO_CLASS
 // function declarations
 //
 
-int gpio_def_wnd_proc( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
+struct WINDOW_CLASS *gpio_create( struct USHELL_CLASS *ushell, int x, int y, int w, int h );
+
+bool gpio_create_proc ( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def );
+bool gpio_paint_proc( struct WINDOW_CLASS *window, struct WINDOW_PAINT_MESSAGE *msg, void *user_def );
 
 // #############################################################################
 

@@ -26,14 +26,9 @@
 // ############################################################################
 
 #include "uShell.h"
-
-#include "Window.h"
 #include "Window_Prompt.h"
 #include "Window_GPIO.h"
-#include "Window_Manager.h"
-
-#include "CyclicStack.h"
-#include "garray.h"
+//#include "Window_Manager.h"
 
 void cmd_func_help( struct WINDOW_CLASS *win, GSList *token_list );
 void cmd_func_test( struct WINDOW_CLASS *win, GSList *token_list );
@@ -50,7 +45,6 @@ struct PROMPT_COMMAND command_list[] =
 struct USHELL_CLASS *ushell;
 struct WINDOW_CLASS *prompt;
 struct WINDOW_CLASS *gpio;
-struct WINDOW_CLASS *window_manager;
 
 int ledPin = 13;      // select the pin for the LED
 
@@ -65,104 +59,16 @@ void setup( )
 	// initialize serial:
 	Serial.begin( 115200 );
 
-	//
-	// uShell
-	//
-
 	ushell = ushell_init( printEvent, NULL );
+	prompt = prompt_create( ushell, command_list, 1, 13, 70, 9 );
+	gpio = gpio_create( ushell, 1, 1, 78, 10 );
 
-	//
-	// Window Manager
-	//
-	
-	struct WINDOW_ATTRIBUTES window_manager_attributes =
-	{
-		.fg_color = VT100_COLOR_DEFAULT,
-		.bg_color = VT100_COLOR_DEFAULT,
-		.border_style = WINDOW_BORDER_SINGLE
-	};
-	
-	struct WINDOW_RECT window_manager_rect =
-	{
-		.x = 0, .y = 0,
-		.w = 80, .h = 24
-	};
-	
-	struct WINDOW_CLASS *window_manager_class = malloc( sizeof(struct WINDOW_MANAGER_CLASS) );
-	memset( window_manager_class, 0, sizeof(struct WINDOW_MANAGER_CLASS) );
+	Serial.print( sizeof(struct WINDOW_PAINT_MESSAGE) ); Serial.print( " " );
+	Serial.print( sizeof(struct WINDOW_KEY_EVENT_MESSAGE) ); Serial.print( " " );
+	Serial.print( sizeof(struct WINDOW_CHARACTER_MESSAGE) ); Serial.print( " " );
+	Serial.print( sizeof(struct WINDOW_SERIAL_EVENT_MESSAGE) ); Serial.print( " " );
+	Serial.print( sizeof(struct WINDOW_GENERIC_MESSAGE) );
 
-	window_manager_class = window_create(
-		ushell,
-		NULL,
-		"Window Manager",
-		&window_manager_attributes,
-		&window_manager_rect,
-		window_manager_def_wnd_proc,
-		window_manager_class
-	);
-
-	//
-	// GPIO window
-	//
-	
-	struct WINDOW_ATTRIBUTES gpio_attributes =
-	{
-		.fg_color = VT100_COLOR_DEFAULT,
-		.bg_color = VT100_COLOR_DEFAULT,
-		.border_style = WINDOW_BORDER_SINGLE
-	};
-	
-	struct WINDOW_RECT gpio_rect =
-	{
-		.x = 1, .y = 1,
-		.w = 78, .h = 10
-	};
-	
-	struct GPIO_CLASS *gpio_class = malloc( sizeof(struct GPIO_CLASS) );
-	memset( gpio_class, 0, sizeof(struct GPIO_CLASS) );
-
-	gpio = window_create(
-		ushell,
-		window_manager_class,
-		"GPIO",
-		&gpio_attributes,
-		&gpio_rect,
-		gpio_def_wnd_proc,
-		gpio_class
-	);
-
-	//
-	// Prompt window
-	//
-	
-	struct WINDOW_ATTRIBUTES prompt_attributes =
-	{
-		.fg_color = VT100_COLOR_DEFAULT,
-		.bg_color = VT100_COLOR_DEFAULT,
-		.border_style = WINDOW_BORDER_DOUBLE
-	};
-	
-	struct WINDOW_RECT prompt_rect =
-	{
-		.x = 1, .y = 13,
-		.w = 70, .h = 9
-	};
-	
-	struct PROMPT_CLASS *prompt_class = malloc( sizeof(struct PROMPT_CLASS) );
-	memset( prompt_class, 0, sizeof(struct PROMPT_CLASS) );
-	prompt_class->command_list = command_list;
-	prompt_class->prompt = "librainductor> ";
-
-	prompt = window_create(
-		ushell,
-		window_manager_class,
-		"Prompt",
-		&prompt_attributes,
-		&prompt_rect,
-		prompt_def_wnd_proc,
-		prompt_class
-	);
-	
 	// declare the ledPin as an OUTPUT:
 	pinMode( ledPin, OUTPUT );
 }
@@ -173,10 +79,11 @@ void loop( )
 {
 	ushell_proccess_loop( ushell, millis( ), -3 );
 
-	struct WINDOW_MESSAGE msg;
+	struct WINDOW_GENERIC_MESSAGE msg;
 	bool msg_result = ushell_get_message( ushell, &msg );
 	if( msg_result == true )
 	{
+		//debug_print2( "dispatch_message", (int) msg.window, msg.command );
 		ushell_dispatch_message( ushell, &msg );
 	}
 }
@@ -195,10 +102,6 @@ void serialEvent( )
 	{
 		// get the new byte:
 		char ch = (char) Serial.read( );
-
-		//Serial.print( "[ serialEvent: " );
-		//Serial.print( (unsigned int) ch );
-		//Serial.print( "]" );
 
 		ushell_proccess_event( ushell, ch );
 	}

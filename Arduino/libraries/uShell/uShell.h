@@ -18,9 +18,8 @@
 //
 
 #include "CyclicStack.h"
-#include "Window.h"
-#include "Console.h"
 #include "gstring.h"
+#include "gslist.h"
 #include "garray.h"
 
 G_BEGIN_DECLS
@@ -28,6 +27,24 @@ G_BEGIN_DECLS
 // #############################################################################
 // type and constant definitions
 //
+
+#define DEBUG 1
+
+#ifdef DEBUG
+
+#define debug_print(name) { Serial.print( "[" ); Serial.print( name ); Serial.println( "]" ); }
+#define debug_print1(name, value1) { Serial.print( "[" ); Serial.print( name ); Serial.print( ": " ); Serial.print( value1 ); Serial.println( "]" ); }
+#define debug_print2(name, value1, value2) { Serial.print( "[" ); Serial.print( name ); Serial.print( ": " ); Serial.print( value1 ); Serial.print( ", " ); Serial.print( value2 ); Serial.println( "]" ); }
+#define debug_print3(name, value1, value2, value3) { Serial.print( "[" ); Serial.print( name ); Serial.print( ": " ); Serial.print( value1 ); Serial.print( ", " ); Serial.print( value2 );  Serial.print( ", " ); Serial.print( value3 ); Serial.println( "]" ); }
+
+#else
+
+#define debug_print(name)
+#define debug_print1(name, value1)
+#define debug_print2(name, value1, value2)
+#define debug_print3(name, value1, value2, value3)
+
+#endif
 
 // #############################################################################
 // class declarations
@@ -288,41 +305,187 @@ enum XTERM_CONTROL_CHARACTER
 
 // #####################################################################
 
+struct USHELL_BUFFER_CELL
+{
+	char ch;
+	unsigned char fg_color;
+	unsigned char bg_color;
+	bool bold;
+	bool underline;
+};
+
 struct USHELL_CLASS
 {
-	void (*print_callback) ( char *str, void *user_def );
-	void *print_user_def;
+	// Terminal dimensions
+	int x, y;
+	int w, h;
+
+	// Double buffering
+	struct USHELL_BUFFER_CELL *buffer1;
+	struct USHELL_BUFFER_CELL *buffer2;
+	struct USHELL_BUFFER_CELL *buffer_current;
 
 	//
 	// Key event proccessing variables
 	//
 	
-	char cmd_escape;
-	char cmd_prev_ch;
-	GString *cmd_escape_buf;        // a string for escape control codes
-	GString *cmd_number;
-	enum XTERM_CONTROL_CHARACTER cmd_control_character;
+	char input_escape;
+	char input_previous_ch;
+	GString *input_escape_buf;        // a string for escape control codes
+	GString *input_escape_number;
+	enum XTERM_CONTROL_CHARACTER input_control_character;
+	struct KEY_EVENT_MODIFIERS input_key_modifiers;
 
-	struct KEY_EVENT_MODIFIERS mods;
-	
 	//
-	// Double buffering console
+	// Output
 	//
-	
-	struct CONSOLE_CLASS  *console;
-	UARTClass *uart_port;
-	
+
+	void (*print_callback) ( char *str, void *user_def );
+	void *print_user_def;
+
 	//
 	// Interface variables
 	//
 	
 	GPtrArray *window_list;
+	int active_window;
 	struct CYCLIC_STACK *message_bank;
+};
+
+// #####################################################################
+
+//
+// Messages
+//
+
+// sizeof(void *) = 4
+// sizeof(enum WINDOW_COMMAND) = 1
+
+enum WINDOW_COMMAND
+{
+	WM_CREATE = 1,
+	WM_DESTROY,
+	WM_PAINT,
+	WM_KEY_EVENT,
+	WM_CHARACTER,
+	WM_SERIAL_EVENT
+};
+
+struct WINDOW_PAINT_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	struct USHELL_BUFFER_CELL *buffer;
+	
+	char padding[3];
+};
+
+struct WINDOW_KEY_EVENT_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	struct KEY_EVENT_MODIFIERS *key_modifiers;
+	char control_character;
+	char ch;
+	
+	char padding[1];
+};
+
+struct WINDOW_CHARACTER_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	char ch;
+	
+	char padding[10];
+};
+
+struct WINDOW_SERIAL_EVENT_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	char ch;
+	
+	char padding[10];
+};
+
+struct WINDOW_GENERIC_MESSAGE
+{
+	struct WINDOW_CLASS *window;
+	enum WINDOW_COMMAND command;
+	
+	char padding[11];
+};
+
+//
+// Window attributes
+//
+
+struct WINDOW_RECT
+{
+	int x; int y;
+	int w; int h;
+};
+
+enum WINDOW_BORDER_STYLE
+{
+	WINDOW_BORDER_NONE = 0,
+	WINDOW_BORDER_SINGLE,
+	WINDOW_BORDER_DOUBLE
+};
+
+struct WINDOW_ATTRIBUTES
+{
+	char fg_color;
+	char bg_color;
+	
+	enum WINDOW_BORDER_STYLE border_style;
+};
+
+//
+// Main window class
+//
+
+struct WINDOW_CLASS
+{
+	// Window tree maintanance
+	struct WINDOW_CLASS *parent_window;
+	GPtrArray *child_window;
+	int active_window;
+
+	char *title;
+	struct WINDOW_ATTRIBUTES attributes;
+	struct WINDOW_RECT rect;
+
+	int cursor_x;
+	int cursor_y;	
+	struct USHELL_BUFFER_CELL *paint_buffer;
+
+	bool (*create_proc) ( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def );
+	bool (*destroy_proc) ( struct WINDOW_CLASS *window, struct WINDOW_GENERIC_MESSAGE *msg, void *user_def );
+	bool (*paint_proc) ( struct WINDOW_CLASS *window, struct WINDOW_PAINT_MESSAGE *msg, void *user_def );
+	bool (*key_event_proc) ( struct WINDOW_CLASS *window, struct WINDOW_KEY_EVENT_MESSAGE *msg, void *user_def );
+	bool (*character_proc) ( struct WINDOW_CLASS *window, struct WINDOW_CHARACTER_MESSAGE *msg, void *user_def );
+	bool (*serial_event_proc) ( struct WINDOW_CLASS *window, struct WINDOW_SERIAL_EVENT_MESSAGE *msg, void *user_def );
+	
+	//int (*wnd_proc) ( struct WINDOW_CLASS *window, enum WINDOW_COMMAND command, int uParam, int vParam );
+
+	// User defined variable to distinguish different windows in a single wnd_proc
+	void *user_def;
+
+	// Feedback
+	struct USHELL_CLASS *ushell;
 };
 
 // #############################################################################
 // function declarations
 //
+
+// Buffer operations
+void ushell_swap_buffers( struct USHELL_CLASS *ushell );
+void ushell_copy_rect( struct USHELL_BUFFER_CELL *dst, struct WINDOW_RECT *rect_dst, struct USHELL_BUFFER_CELL *src, struct WINDOW_RECT *rect_src );
+void ushell_print_full( struct USHELL_CLASS *ushell, int _x, int _y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *value );
+void ushell_print( struct USHELL_CLASS *ushell, int _x, int _y, char *value );
 
 struct USHELL_CLASS *ushell_init( void (*proccess_print) ( char *, void * ), void *user_def );
 
@@ -331,11 +494,20 @@ void ushell_proccess_event( struct USHELL_CLASS *ushell, char ch );
 void ushell_proccess_print( struct USHELL_CLASS *ushell, char *str );
 
 struct USHELL_WINDOW *ushell_create_window( int x, int y, int w, int h, struct USHELL_WINDOW_ATTRIBUTES *attributes, int (*callback_proc) (struct USHELL_WINDOW *window, int command, int uParam, int vParam ) );
-int ushell_send_command( struct USHELL_WINDOW *window, int command, int uParam, int vParam );
 
-void ushell_add_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg );
-bool ushell_get_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg_out );
-void ushell_dispatch_message( struct USHELL_CLASS *ushell, struct WINDOW_MESSAGE *msg );
+void ushell_register_window( struct USHELL_CLASS *ushell, struct WINDOW_CLASS *window );
+void ushell_send_message( struct USHELL_CLASS *ushell, void *msg );
+bool ushell_get_message( struct USHELL_CLASS *ushell, void *msg_out );
+void ushell_dispatch_message( struct USHELL_CLASS *ushell, void *msg );
+
+void ushell_draw_statusbar( struct USHELL_CLASS *ushell );
+bool ushell_paint_proc( struct WINDOW_CLASS *window, struct WINDOW_PAINT_MESSAGE *msg, void *user_def );
+bool ushell_serial_event_proc( struct USHELL_CLASS *ushell, struct WINDOW_SERIAL_EVENT_MESSAGE *msg, void *user_def );
+
+void ushell_write_text_full( struct USHELL_CLASS *ushell, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *str, int len );
+void ushell_write_text( struct USHELL_CLASS *ushell, int x, int y, char *str );
+void ushell_write_cell_full( struct USHELL_CLASS *ushell, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char ch );
+void ushell_write_cell( struct USHELL_CLASS *ushell, int x, int y, char ch );
 
 //
 // Key event proccessing
@@ -348,6 +520,20 @@ void ushell_prompt_reset(struct USHELL_CLASS *ushell );
 void ushell_escape_end( struct USHELL_CLASS *ushell );
 
 //void reprint_line( );
+
+struct WINDOW_CLASS *window_create(
+	struct USHELL_CLASS *ushell,
+	struct WINDOW_CLASS *parent,
+	const char *title,
+	struct WINDOW_ATTRIBUTES *attributes,
+	struct WINDOW_RECT *rect,
+	void *user_def
+);
+
+void window_write_text_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char *str, int len );
+void window_write_text( struct WINDOW_CLASS *window, int x, int y, char *str );
+void window_write_cell_full( struct WINDOW_CLASS *window, int x, int y, bool bold, bool underline, unsigned char fg_color, unsigned char bg_color, char ch );
+void window_write_cell( struct WINDOW_CLASS *window, int x, int y, char ch );
 
 // #############################################################################
 
